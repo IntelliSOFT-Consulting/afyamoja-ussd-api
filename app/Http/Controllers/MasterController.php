@@ -54,12 +54,17 @@ class MasterController extends Controller
                     return self::menuItem(5, 0);
                     break;
                 case $level == 1 && $userData->terms_conditions == 0:
-                    self::level(2, $text);
                     if ($text) {
                         $names = explode(" ", $text);
                         $first_name = $names[0];
-                        $last_name = count($names) > 1 ? $names[1]:'';
-                        DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['first_name' => $first_name,'last_name'=>$last_name]);
+                        $last_name = count($names) > 1 ? $names[1]:null;
+
+                        if($last_name){
+                            self::level(2, $text);
+                            DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['first_name' => $first_name,'last_name'=>$last_name]);
+                        }else{
+                            return self::menuItem(0, 1);
+                        }
                     }
                     return  self::menuItem($level, 0);
                     break;
@@ -69,7 +74,7 @@ class MasterController extends Controller
                     return self::menuItem($level, 0);
                     break;
                 case $level == 2  && !is_numeric($text):
-                    return self::menuItem($level-1, 1);
+                    return self::menuItem(1, 1);
                     break;
                 case $level == 3  && is_numeric($text) && strlen($text) == 8:
                     self::level(4, $text);
