@@ -166,6 +166,7 @@ class MasterController extends Controller
                     break;
                 case $level == 6 && $text == 9:
                     self::level(79, 9);
+                    Sms::sendSMS($_POST['phoneNumber'], self::smsItem('faq'));
                     return self::menuItem($level, 8);
                     break;
                 case $level == 6 && $text == 10:
