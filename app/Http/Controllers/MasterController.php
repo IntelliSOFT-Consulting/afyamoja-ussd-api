@@ -308,7 +308,7 @@ class MasterController extends Controller
                             self::level(164, 1);
                             return self::menuItem($level, 0);
                         } else {
-                            self::level(165);
+                            self::level(165,1);
                             $userKin = DB::table('dependents')->where('sessionId', '=', $sessionId)->latest()->first();
                             $addKin = self::addKin($userKin, $userData, $userSession->access_token);
                             if ($addKin) {
@@ -612,6 +612,6 @@ class MasterController extends Controller
             return $curl_response->access_token ;
         }
 
-        return null;
+        return '';
     }
 }
