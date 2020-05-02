@@ -45,6 +45,7 @@ class MasterController extends Controller
         } else {
             $userSession = DB::table('sessions')->where('sessionId', '=', $sessionId)->latest()->first();
             $name = $userData->first_name." ".$userData->last_name;
+            $age = (int)date("Y") - (int)substr($userData->dob, 4, 4);
             $level = $userSession->level;
 
             switch ($level) {
@@ -59,10 +60,10 @@ class MasterController extends Controller
                         $first_name = $names[0];
                         $last_name = count($names) > 1 ? $names[1]:null;
 
-                        if($last_name){
+                        if ($last_name) {
                             self::level(2, $text);
                             DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['first_name' => $first_name,'last_name'=>$last_name]);
-                        }else{
+                        } else {
                             return self::menuItem(0, 1);
                         }
                     }
@@ -123,34 +124,48 @@ class MasterController extends Controller
                     return self::menuItem($level, 2);
                     break;
 
-                case $level == 6 && strlen($text) > 5 && $userData->id_number == $text && $userSession->forgot_password == 1:
-                    self::level(7, 9990);
-                    return self::menuItem($level, 9990);
-                    break;
-                case $level == 6 && strlen($text) > 5 && $userData->id_number != $text && $userSession->forgot_password == 1:
-                    self::forgotPassword(0);
-                    return self::menuItem($level, 9991);
+                case $level == 6 && strlen($text) > 5 && $userSession->forgot_password == 1:
+                    self::level(7, $text);
+                    if ($userData->id_number == $text) {
+                        return self::menuItem($level, 9990);
+                    } elseif ($userData->id_number != $text) {
+                        self::forgotPassword(0);
+                        return self::menuItem($level, 9991);
+                    }
                     break;
                 case $level == 6 && $text == 1:
                     self::level(71, 1);
                     return self::menuItem($level, 0);
                     break;
                 case $level == 6 && $text == 2:
-                    return self::menuItem($level, 1);
+                    $profile = self::profile($userData, $userSession->access_token);
+                    if ($profile) {
+                        $placeHolders = ['_name', '_age','_allergies','_conditions'];
+                        $content = [$name,$age,$profile ? $profile->data->allergies : '',$profile ? $profile->data->conditions : ''];
+                        Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
+                        return str_replace($placeHolders, $content, self::menuItem($level, 1));
+                    } else {
+                        self::level(63, 0);
+                        return self::menuItem(63, 0);
+                    }
                     break;
                 case $level == 6 && $text == 3:
                     $visit = self::visit($userData, $userSession->access_token);
                     if ($visit) {
-                        $content = self::menuItem($level, 2);
-                        $content = str_replace("_visit", $visit->data->summary, $content);
-                        $content = str_replace("_url", $visit->data->summary, $content);
-                        return $content;
+                        $placeHolders = ['_visit', '_url'];
+                        $content = [$visit->data->summary,$visit->data->short_url];
+                        return str_replace($placeHolders, $content, self::menuItem($level, 2));
+                        Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('visit')));
                     } else {
                         self::level(63, 0);
                         return self::menuItem(63, 0);
                     }
                     break;
                 case $level == 6 && $text == 4:
+                    $history = self::history($userData, $userSession->access_token);
+                    if ($history) {
+                        Sms::sendSMS($_POST['phoneNumber'], str_replace('_url', $history->data->short_url, self::smsItem('medical_history')));
+                    }
                     return self::menuItem($level, 3);
                     break;
                 case $level == 6 && $text == 5:
@@ -214,6 +229,7 @@ class MasterController extends Controller
                     break;
                 case $level == 75 && strlen($text) > 1:
                     self::level(85, $text);
+                    DB::table('questons')->insert(['msisdn' => $_POST['phoneNumber'],'question' => $text]);
                     return self::menuItem($level, 0);
                     break;
                 case $level == 76 && $text == 1:
@@ -247,11 +263,17 @@ class MasterController extends Controller
                 case $level == 79 && $text == 00:
                     return self::menuItem(4, 0);
                     break;
-                case $level == 81 && ($text == 1 || $text == 2):
-                    return self::menuItem($level, 0);
-                    break;
-                case $level == 81 && ($text != 1 || $text != 2):
-                    return self::menuItem(71, 2);
+                case $level == 81:
+                    if ($text == 1 || $text == 2) {
+                        $share = self::shareProfile('', $text, $userSession->access_token);
+                        if ($share) {
+                            return self::menuItem($level, 0);
+                        } else {
+                            return self::menuItem($level, 1);
+                        }
+                    } else {
+                        return self::menuItem(71, 2);
+                    }
                     break;
                 case $level == 85:
                     self::level(6, 1);
@@ -308,15 +330,16 @@ class MasterController extends Controller
                             self::level(164, 1);
                             return self::menuItem($level, 0);
                         } else {
-                            self::level(165,1);
                             $userKin = DB::table('dependents')->where('sessionId', '=', $sessionId)->latest()->first();
                             $addKin = self::addKin($userKin, $userData, $userSession->access_token);
                             if ($addKin) {
+                                self::level(165, 1);
                                 $name_kin = $userKin->first_name." ".$userKin->last_name;
                                 DB::table('dependents')->where('sessionId', $sessionId)->update(['status' => 1]);
                                 Sms::sendSMS($phonenumber, str_replace("_name", $name_kin, self::smsItem('kin')));
                                 return str_replace("_name", $name_kin, self::menuItem($level, 1));
                             }
+                            return self::menuItem($level, 2);
                         }
                     } else {
                         return self::menuItem(2, 1);
@@ -324,7 +347,7 @@ class MasterController extends Controller
                     break;
                 case $level == 164:
                     if (is_numeric($text) && strlen($text) > 9) {
-                        $msisdn = substr($text,1);
+                        $msisdn = substr($text, 1);
                         $msisdn = '+254'.$msisdn;
                         DB::table('dependents')->where('sessionId', $sessionId)->update(['msisdn' => $msisdn]);
                         self::level(165, 0);
@@ -465,10 +488,14 @@ class MasterController extends Controller
              'last_name'=> $userKin->last_name,
              'date_of_birth'=> $userKin->dob,
              'gender'=> $userKin->gender,
-             'msisdn'=> [$userKin->msisdn],
-             'id_number'=>$userKin->id_number ,
-             'passport_number'=> ''
+             'relationship'=>$userKin->relationship,
+
         ];
+
+        if ($userKin->relationship != 'child') {
+            $next_of_kin = (object) array_merge((array)$next_of_kin, array(  'msisdn'=> [$userKin->msisdn],'id_number'=>$userKin->id_number ));
+        }
+
         $curl_post_data = array('patient'=> $patient_data, 'next_of_kin' => [$next_of_kin]);
         $data_string = json_encode($curl_post_data);
         $add_kin = json_decode(self::generalAPI($data_string, $token, 'patients/add_next_of_kin/'));
@@ -523,7 +550,7 @@ class MasterController extends Controller
 
         $curl_post_data = array('patient'=> $objectPatient);
         $data_string = json_encode($curl_post_data);
-        $visit = json_decode(self::generalAPI($data_string, $token, 'patients/recent_visit/'));
+        $visit = json_decode(self::generalAPI($data_string, $token, 'patients/last_visit/'));
         if ($visit && $visit->status == "Success") {
             return $visit;
         } else {
@@ -544,6 +571,44 @@ class MasterController extends Controller
         $dependents = json_decode(self::generalAPI($data_string, $token, 'patients/get_next_of_kin/'));
         if ($dependents && count($dependents) > 0) {
             return $dependents;
+        } else {
+            return null;
+        }
+    }
+
+
+    public function profile($userData, $token)
+    {
+        $objectPatient = (object) [
+            'msisdn'=> [$userData->phonenumber],
+            'id_number'=> $userData->id_number ,
+            'passport_number'=> ''
+        ];
+
+        $curl_post_data = array('patient'=> $objectPatient);
+        $data_string = json_encode($curl_post_data);
+        $profile = json_decode(self::generalAPI($data_string, $token, 'patients/patient_profile/'));
+        if ($profile && $profile->status == "Success") {
+            return $profile;
+        } else {
+            return null;
+        }
+    }
+
+
+    public function history($userData, $token)
+    {
+        $objectPatient = (object) [
+            'msisdn'=> [$userData->phonenumber],
+            'id_number'=> $userData->id_number ,
+            'passport_number'=> ''
+        ];
+
+        $curl_post_data = array('patient'=> $objectPatient);
+        $data_string = json_encode($curl_post_data);
+        $history = json_decode(self::generalAPI($data_string, $token, 'patients/full_medical_history/'));
+        if ($history && $history->status == "Success") {
+            return $history;
         } else {
             return null;
         }
@@ -577,10 +642,14 @@ class MasterController extends Controller
         }
         curl_setopt($curl, CURLOPT_HEADER, false);
         $curl_response = curl_exec($curl);
+        $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         Log::info("api response --- ".json_encode($curl_response));
-
-        return $curl_response;
+        if ($httpcode != 500 && $httpcode != 401) {
+            return $curl_response;
+        } else {
+            return null;
+        }
     }
 
 
