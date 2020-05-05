@@ -228,7 +228,7 @@ class MasterController extends Controller
                     break;
                 case $level == 75 && strlen($text) > 1:
                     self::level(85, $text);
-                    DB::table('questons')->insert(['msisdn' => $_POST['phoneNumber'],'question' => $text]);
+                    DB::table('questions')->insert(['msisdn' => $_POST['phoneNumber'],'question' => $text]);
                     return self::menuItem($level, 0);
                     break;
                 case $level == 76 && $text == 1:
