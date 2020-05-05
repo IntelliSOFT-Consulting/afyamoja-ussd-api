@@ -110,20 +110,19 @@ class MasterController extends Controller
                 case $level == 5 && $userData->terms_conditions == 0 && $text != 1:
                     return self::menuItem(5, 5);
                     break;
-                case $level == 5 && $text == $userData->pin && $userData->terms_conditions == 1:
-                    self::level(6, 1);
-                    return self::menuItem($level, 1);
-                    break;
-                case $level == 5 && $text == 999:
+                case $level == 5 && $userData->terms_conditions == 1 && $text == 999:
                     self::forgotPassword(1);
                     self::level(6, $text);
                     return self::menuItem($level, 3);
+                    break;
+                case $level == 5 && $text == $userData->pin && $userData->terms_conditions == 1:
+                    self::level(6, 1);
+                    return self::menuItem($level, 1);
                     break;
                 case $level == 5 && $text != $userData->pin && $userData->terms_conditions == 1:
                     self::level($level, 3);
                     return self::menuItem($level, 2);
                     break;
-
                 case $level == 6 && strlen($text) > 5 && $userSession->forgot_password == 1:
                     self::level(7, $text);
                     if ($userData->id_number == $text) {
@@ -138,10 +137,10 @@ class MasterController extends Controller
                     return self::menuItem($level, 0);
                     break;
                 case $level == 6 && $text == 2:
-                    $profile = self::profile($userData, $userSession->access_token);
-                    if ($profile) {
+                    $request = self::request('patient_profile', $userData, $userSession->access_token);
+                    if ($request) {
                         $placeHolders = ['_name', '_age','_allergies','_conditions'];
-                        $content = [$name,$age,$profile ? $profile->data->allergies : '',$profile ? $profile->data->conditions : ''];
+                        $content = [$name,$age,$request ? $request->data->allergies : '',$request ? $request->data->conditions : ''];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
                         return str_replace($placeHolders, $content, self::menuItem($level, 1));
                     } else {
@@ -150,10 +149,10 @@ class MasterController extends Controller
                     }
                     break;
                 case $level == 6 && $text == 3:
-                    $visit = self::visit($userData, $userSession->access_token);
-                    if ($visit) {
+                    $request = self::request('last_visit', $userData, $userSession->access_token);
+                    if ($request) {
                         $placeHolders = ['_visit', '_url'];
-                        $content = [$visit->data->summary,$visit->data->short_url];
+                        $content = [$request->data->summary,$request->data->short_link];
                         return str_replace($placeHolders, $content, self::menuItem($level, 2));
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('visit')));
                     } else {
@@ -162,9 +161,9 @@ class MasterController extends Controller
                     }
                     break;
                 case $level == 6 && $text == 4:
-                    $history = self::history($userData, $userSession->access_token);
-                    if ($history) {
-                        Sms::sendSMS($_POST['phoneNumber'], str_replace('_url', $history->data->short_url, self::smsItem('medical_history')));
+                    $request = self::request('full_medical_history', $userData, $userSession->access_token);
+                    if ($request) {
+                        Sms::sendSMS($_POST['phoneNumber'], str_replace('_url', $request->data->short_link, self::smsItem('medical_history')));
                     }
                     return self::menuItem($level, 3);
                     break;
@@ -197,12 +196,11 @@ class MasterController extends Controller
                     break;
                 case $level == 7 && is_numeric($text) && strlen($text) == 8 && $userSession->forgot_password == 1:
                     self::forgotPassword(0);
-                    $new_pin = rand(0001, 9999);
-                    $placeHolders = ['_name', '_pin'];
-                    $content = [$name,$new_pin];
-                    $resetPin = self::resetPin($userData, $userSession->access_token, $new_pin);
-                    if ($resetPin) {
-                        DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $new_pin]);
+                    $request = self::request('forgot_pin', $userData, $userSession->access_token);
+                    if ($request) {
+                        $placeHolders = ['_name', '_pin'];
+                        $content = [$name,$request->data->pin];
+                        DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $request->data->pin]);
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
                         return str_replace("_name", $name, self::menuItem($level, 9990));
                     }
@@ -222,6 +220,7 @@ class MasterController extends Controller
                     $provider = self::provider($userSession->access_token, $text);
                     if ($provider) {
                         self::level(81, $text);
+                        DB::table('sessions')->where('sessionId', $userSession->access_token)->update(['provider' => $text]);
                         return str_replace("_provider", $provider, self::menuItem($level, 1));
                     } else {
                         return self::menuItem($level, 2);
@@ -242,6 +241,7 @@ class MasterController extends Controller
                     $dependents = self::dependents($userData, $userSession->access_token);
                     $dependentList = "";
                     if ($dependents) {
+                        DB::table('sessions')->where('sessionId', $userSession->sessionId)->update(['kin' => json_encode($dependents)]);
                         for ($i = 0;$i < count($dependents);$i++) {
                             $number = $i+1;
                             $dependentList .= $number.".".$dependents[$i]->first_name." ".$dependents[$i]->last_name."\n";
@@ -265,12 +265,8 @@ class MasterController extends Controller
                     break;
                 case $level == 81:
                     if ($text == 1 || $text == 2) {
-                        $share = self::shareProfile('', $text, $userSession->access_token);
-                        if ($share) {
-                            return self::menuItem($level, 0);
-                        } else {
-                            return self::menuItem($level, 1);
-                        }
+                        $share = self::shareProfile($userSession->provider, $text, $userSession->access_token);
+                        return $share ? self::menuItem($level, 0) : self::menuItem($level, 1);
                     } else {
                         return self::menuItem(71, 2);
                     }
@@ -280,14 +276,27 @@ class MasterController extends Controller
                     return self::menuItem(5, 1);
                     break;
                 case $level == 87 && is_numeric($text) && strlen($text) == 4:
-                    DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $text]);
-                    return self::menuItem($level, 0);
+                    $resetPin = self::resetPin($userData, $userSession->access_token, $text);
+                    if ($resetPin) {
+                        DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $text]);
+                        return self::menuItem($level, 0);
+                    } else {
+                        self::level(5, 1);
+                        return self::menuItem(0, 2);
+                    }
                     break;
                 case $level == 87 && (!is_numeric($text) ||strlen($text) == 4):
                     return self::menuItem($level, 1);
                     break;
                 case $level == 88 && is_numeric($text) && strlen($text) == 4:
-                    return self::menuItem($level, 0);
+                    $request = self::request('forget_patient', $userData, $userSession->access_token);
+                    if ($request) {
+                        Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
+                        return self::menuItem($level, 0);
+                    } else {
+                        self::level(5, 1);
+                        return self::menuItem(0, 2);
+                    }
                     break;
                 case $level == 88 && (!is_numeric($text) || strlen($text) != 4):
                     return self::menuItem($level, 1);
@@ -383,11 +392,13 @@ class MasterController extends Controller
                         self::level(6, 1);
                         return self::menuItem(5, 1);
                     } elseif (is_numeric($text) && $text != 0) {
-                        $dependents = self::dependents($userData, $userSession->access_token);
+                        $dependents = json_decode($userSession->kin);
                         if ($dependents && $dependents[$text-1]->first_name) {
                             self::level(261, $text);
-                            $dependantName = $dependents[$text-1]->first_name." ".$dependents[$text]->last_name;
-                            return str_replace("_dependent", $dependentList, self::menuItem($level, 0));
+                            $dependantAge = date("Y", strtotime($dependents[$text-1]->date_of_birth));
+                            $dependantName = $dependents[$text-1]->first_name." ".$dependents[$text-1]->last_name;
+                            DB::table('sessions')->where('sessionId', $userSession->access_token)->update(['dependent' => $dependantName,'dependent_age' => $dependantAge]);
+                            return str_replace("_dependent", $dependantName, self::menuItem($level, 0));
                         } else {
                             $dependentList = "";
                             if ($dependents) {
@@ -410,7 +421,61 @@ class MasterController extends Controller
                     } elseif (strlen($text) == 2 && $text == 00) {
                         self::level(161, 1);
                         return self::menuItem(160, 0);
+                    } elseif ($text == 1) {
+                        $request = self::request('next_of_kin_profile', $userData, $userSession->access_token);
+                        if ($request) {
+                            $placeHolders = ['_name', '_age','_allergies','_conditions'];
+                            $content = [
+                                        $userSession->dependent,
+                                        $userSession->dependent_age,
+                                        $request->data->allergies ? $request->data->allergies : '',
+                                        $request->data->conditions ? $request->data->conditions : ''
+                                    ];
+                            Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
+                            return str_replace($placeHolders, $content, self::menuItem($level, 1));
+                        } else {
+                            self::level(262, 1);
+                            return str_replace("_dependent", $dependantName, self::menuItem(260, 0));
+                        }
+                    } elseif ($text == 2) {
+                        return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 0));
+                    } else {
+                        self::level(999, $text);
+                        return self::menuItem(0, 2);
                     }
+                    break;
+                case $level == 262:
+                    if ($text == 1) {
+                        self::level(263, $text);
+                        return self::menuItem(262, 0);
+                    } elseif ($text == 2) {
+                        self::level(263, $text);
+                        return self::menuItem(262, 1);
+                    } else {
+                        self::level(999, $text);
+                        return self::menuItem(0, 2);
+                    }
+                    break;
+                case $level == 263:
+                    if ($text == 0) {
+                        self::level(260, $text);
+                        return str_replace("_dependents", $userSession->dependent, self::menuItem($level, 1));
+                    } elseif (strlen($text) == 4 && $text == $userData->pin) {
+                        $request = self::removeKin($userData, $userSession->access_token, $userSession->dependent);
+                        if ($request) {
+                            return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 0));
+                        } else {
+                            self::level(999, $text);
+                            return self::menuItem(0, 2) ;
+                        }
+                    } else {
+                        self::level(6, 1);
+                        return self::menuItem(5, 1);
+                    }
+                    break;
+                case $level == 999:
+                    self::level(6, 1);
+                    return self::menuItem(5, 1);
                     break;
                 default:
                     self::level(5, $text);
@@ -422,7 +487,12 @@ class MasterController extends Controller
     public function menuItem($level, $choice)
     {
         $content =  DB::table('menuItem')->where('level', '=', $level)->where('choice', '=', $choice)->first();
-        return $content? str_replace('_new', "\n", $content->text):'END Sorry, we are unable to process your request.';
+        if ($content) {
+            return str_replace('_new', "\n", $content->text);
+        } else {
+            self::level(6, 1);
+            return "CON Sorry, we are unable to process your request. \nEnter any key to go back ";
+        }
     }
 
     public function smsItem($title)
@@ -506,6 +576,33 @@ class MasterController extends Controller
         }
     }
 
+    public function removeKin($userData, $token, $full_name)
+    {
+        $names = explode(" ", $full_name);
+        $first_name = $names[0];
+        $last_name = count($names) > 1 ? $names[1]:'';
+
+        $patient_data = (object) [
+            'msisdn'=> [$userData->phonenumber],
+            'id_number'=> $userData->id_number ,
+            'passport_number'=> ''
+        ];
+
+        $next_of_kin = (object) [
+             'first_name'=> $first_name,
+             'last_name'=> $last_name
+        ];
+
+        $curl_post_data = array('patient'=> $patient_data, 'next_of_kin' => [$next_of_kin]);
+        $data_string = json_encode($curl_post_data);
+        $add_kin = json_decode(self::generalAPI($data_string, $token, 'patients/remove_next_of_kin/'));
+        if ($add_kin && $add_kin->status == "Success") {
+            return $add_kin;
+        } else {
+            return null;
+        }
+    }
+
     public function shareProfile($provider_code, $scope, $token)
     {
         $curl_post_data = array(
@@ -514,9 +611,9 @@ class MasterController extends Controller
                 'scope'=> $scope
         );
         $data_string = json_encode($curl_post_data);
-        $visit = json_decode(self::generalAPI($data_string, $token, 'patients/start_visit/'));
-        if ($visit && $visit->status == "Success") {
-            return $visit;
+        $share = json_decode(self::generalAPI($data_string, $token, 'patients/start_visit/'));
+        if ($share && $share->status == "Success") {
+            return $share;
         } else {
             return null;
         }
@@ -540,24 +637,6 @@ class MasterController extends Controller
         }
     }
 
-    public function visit($userData, $token)
-    {
-        $objectPatient = (object) [
-            'msisdn'=> [$userData->phonenumber],
-            'id_number'=> $userData->id_number ,
-            'passport_number'=> ''
-        ];
-
-        $curl_post_data = array('patient'=> $objectPatient);
-        $data_string = json_encode($curl_post_data);
-        $visit = json_decode(self::generalAPI($data_string, $token, 'patients/last_visit/'));
-        if ($visit && $visit->status == "Success") {
-            return $visit;
-        } else {
-            return null;
-        }
-    }
-
     public function dependents($userData, $token)
     {
         $objectPatient = (object) [
@@ -576,8 +655,7 @@ class MasterController extends Controller
         }
     }
 
-
-    public function profile($userData, $token)
+    public function request($url, $userData, $token)
     {
         $objectPatient = (object) [
             'msisdn'=> [$userData->phonenumber],
@@ -587,28 +665,9 @@ class MasterController extends Controller
 
         $curl_post_data = array('patient'=> $objectPatient);
         $data_string = json_encode($curl_post_data);
-        $profile = json_decode(self::generalAPI($data_string, $token, 'patients/patient_profile/'));
-        if ($profile && $profile->status == "Success") {
-            return $profile;
-        } else {
-            return null;
-        }
-    }
-
-
-    public function history($userData, $token)
-    {
-        $objectPatient = (object) [
-            'msisdn'=> [$userData->phonenumber],
-            'id_number'=> $userData->id_number ,
-            'passport_number'=> ''
-        ];
-
-        $curl_post_data = array('patient'=> $objectPatient);
-        $data_string = json_encode($curl_post_data);
-        $history = json_decode(self::generalAPI($data_string, $token, 'patients/full_medical_history/'));
-        if ($history && $history->status == "Success") {
-            return $history;
+        $response = json_decode(self::generalAPI($data_string, $token, 'patients/'.$url.'/'));
+        if ($response && $response->status == "Success") {
+            return $response;
         } else {
             return null;
         }
