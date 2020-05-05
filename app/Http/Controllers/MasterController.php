@@ -281,11 +281,11 @@ class MasterController extends Controller
                         DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $text]);
                         return self::menuItem($level, 0);
                     } else {
-                        self::level(5, 1);
+                        self::level(999, 1);
                         return self::menuItem(0, 2);
                     }
                     break;
-                case $level == 87 && (!is_numeric($text) ||strlen($text) == 4):
+                case $level == 87 && (!is_numeric($text) || strlen($text) == 4):
                     return self::menuItem($level, 1);
                     break;
                 case $level == 88 && is_numeric($text) && strlen($text) == 4:
@@ -700,6 +700,7 @@ class MasterController extends Controller
             curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_post_data);
         }
         curl_setopt($curl, CURLOPT_HEADER, false);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 3);
         $curl_response = curl_exec($curl);
         $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
