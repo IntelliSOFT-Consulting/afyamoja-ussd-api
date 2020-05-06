@@ -140,7 +140,7 @@ class MasterController extends Controller
                     $request = self::request('patient_profile', $userData, $userSession->access_token);
                     if ($request) {
                         $placeHolders = ['_name', '_age','_allergies','_conditions'];
-                        $content = [$name,$age,$request ? $request->data->allergies : '',$request ? $request->data->conditions : ''];
+                        $content = [ $name, $age,$request->data->allergy, ''];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
                         return str_replace($placeHolders, $content, self::menuItem($level, 1));
                     } else {
@@ -212,7 +212,8 @@ class MasterController extends Controller
                      ($level == 63 && $text == 0) ||
                      ($level == 75 && is_numeric($text) && $text == 0) ||
                      ($level == 78 && $text != 1) ||
-                     ($level == 79 && $text == 0):
+                     ($level == 79 && $text == 0) ||
+                     ($level == 71 && $text == 0) :
                     self::level(6, 1);
                     return self::menuItem(5, 1);
                     break;
@@ -221,9 +222,9 @@ class MasterController extends Controller
                     if ($provider) {
                         self::level(81, $text);
                         DB::table('sessions')->where('sessionId', $userSession->access_token)->update(['provider' => $text]);
-                        return str_replace("_provider", $provider, self::menuItem($level, 1));
+                        return str_replace("_provider", $provider, self::menuItem($level, 0));
                     } else {
-                        return self::menuItem($level, 2);
+                        return self::menuItem($level, 1);
                     }
                     break;
                 case $level == 75 && strlen($text) > 1:
@@ -667,6 +668,7 @@ class MasterController extends Controller
         $data_string = json_encode($curl_post_data);
         $response = json_decode(self::generalAPI($data_string, $token, 'patients/'.$url.'/'));
         if ($response && $response->status == "Success") {
+            Log::info("api response --- ".json_encode($response));
             return $response;
         } else {
             return null;
