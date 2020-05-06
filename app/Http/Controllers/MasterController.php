@@ -295,7 +295,7 @@ class MasterController extends Controller
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
                         return self::menuItem($level, 0);
                     } else {
-                        self::level(5, 1);
+                        self::level(999, 1);
                         return self::menuItem(0, 2);
                     }
                     break;
@@ -303,14 +303,19 @@ class MasterController extends Controller
                     return self::menuItem($level, 1);
                     break;
                 case $level == 160:
-                    self::level(161, 0);
+
                     if ($text) {
                         $names = explode(" ", $text);
                         $first_name = $names[0];
                         $last_name = count($names) > 1 ? $names[1]:'';
-                        DB::table('dependents')->where('sessionId', $sessionId)->update(['first_name' => $first_name, 'last_name' => $last_name]);
+
+                        if ($last_name) {
+                            self::level(161, 0);
+                            return self::menuItem(3, 0);
+                            DB::table('dependents')->where('sessionId', $sessionId)->update(['first_name' => $first_name, 'last_name' => $last_name]);
+                        }
                     }
-                    return self::menuItem(3, 0);
+                    return self::menuItem(76, 0);
                     break;
                 case $level == 161:
                     if ($text == 1 || $text == 2) {
