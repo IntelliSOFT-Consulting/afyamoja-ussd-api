@@ -152,7 +152,7 @@ class MasterController extends Controller
                     $request = self::request('last_visit', $userData, $userSession->access_token);
                     if ($request) {
                         $placeHolders = ['_visit', '_url'];
-                        $content = [$request->data->summary,$request->data->short_link];
+                        $content = [$request->data->summary,$request->data->shortLink];
                         return str_replace($placeHolders, $content, self::menuItem($level, 2));
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('visit')));
                     } else {
@@ -311,9 +311,9 @@ class MasterController extends Controller
                         $last_name = count($names) > 1 ? $names[1]:'';
 
                         if ($last_name) {
+                            DB::table('dependents')->where('sessionId', $sessionId)->update(['first_name' => $first_name, 'last_name' => $last_name]);
                             self::level(161, 0);
                             return self::menuItem(3, 0);
-                            DB::table('dependents')->where('sessionId', $sessionId)->update(['first_name' => $first_name, 'last_name' => $last_name]);
                         }
                     }
                     return self::menuItem(76, 0);
@@ -442,7 +442,7 @@ class MasterController extends Controller
                             return str_replace($placeHolders, $content, self::menuItem($level, 1));
                         } else {
                             self::level(262, 1);
-                            return str_replace("_dependent", $dependantName, self::menuItem(260, 0));
+                            return str_replace("_dependent", $userSession->dependent, self::menuItem(260, 0));
                         }
                     } elseif ($text == 2) {
                         return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 0));
@@ -466,7 +466,7 @@ class MasterController extends Controller
                 case $level == 263:
                     if ($text == 0) {
                         self::level(260, $text);
-                        return str_replace("_dependents", $userSession->dependent, self::menuItem($level, 1));
+                        return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 1));
                     } elseif (strlen($text) == 4 && $text == $userData->pin) {
                         $request = self::removeKin($userData, $userSession->access_token, $userSession->dependent);
                         if ($request) {
@@ -697,7 +697,7 @@ class MasterController extends Controller
         $url = env("url");
         $url = $url.$path;
 
-        Log::info("api path --- ".$url);
+        Log::info("api path --- ".$curl_post_data);
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
