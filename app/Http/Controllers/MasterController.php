@@ -610,7 +610,7 @@ class MasterController extends Controller
         }
     }
 
-    public function shareProfile($userSession,$userData, $scope, $token)
+    public function shareProfile($userSession,$userData,$scope)
     {
         $curl_post_data = array(
             "patient" => (object) [
