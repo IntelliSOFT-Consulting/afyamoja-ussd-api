@@ -266,7 +266,7 @@ class MasterController extends Controller
                     break;
                 case $level == 81:
                     if ($text == 1 || $text == 2) {
-                        $share = self::shareProfile($userSession->provider, $text, $userSession->access_token);
+                        $share = self::shareProfile($userSession,$userData, $text);
                         return $share ? self::menuItem($level, 0) : self::menuItem($level, 1);
                     } else {
                         return self::menuItem(71, 2);
@@ -610,19 +610,19 @@ class MasterController extends Controller
         }
     }
 
-    public function shareProfile($provider_code, $scope, $token)
+    public function shareProfile($userSession,$userData, $scope, $token)
     {
         $curl_post_data = array(
             "patient" => (object) [
-                        'msisdn'=> [$_POST['phoneNumber']],
+                        'msisdn'=> [$userData->phonenumber],
                         'id_number'=> $userData->id_number ,
                         'passport_number'=> ''
                     ],
-                'provider_code'=> $provider_code ,
+                'provider_code'=> $userSession->provider ,
                 'scope'=> $scope
         );
         $data_string = json_encode($curl_post_data);
-        $share = json_decode(self::generalAPI($data_string, $token, 'patients/start_visit/'));
+        $share = json_decode(self::generalAPI($data_string, $userSession->token, 'patients/start_visit/'));
         if ($share && $share->status == "Success") {
             return $share;
         } else {
