@@ -140,7 +140,7 @@ class MasterController extends Controller
                     $request = self::request('patient_profile', $userData, $userSession->access_token);
                     if ($request) {
                         $placeHolders = ['_name', '_age','_allergies','_conditions'];
-                        $content = [ $name, $age, $request->data->allergy, ''];
+                        $content = [ $name, $age, json_encode($request->data->allergy), ''];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
                         return str_replace($placeHolders, $content, self::menuItem($level, 1));
                     } else {
