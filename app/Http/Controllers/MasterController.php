@@ -613,7 +613,12 @@ class MasterController extends Controller
     public function shareProfile($provider_code, $scope, $token)
     {
         $curl_post_data = array(
-                'identifier'=> $_POST['phoneNumber'],
+            "patient": (object) [
+                        'msisdn'=> [$_POST['phoneNumber']],
+                        'id_number'=> $userData->id_number ,
+                        'passport_number'=> ''
+                    ],
+                'identifier'=> ,
                 'provider_code'=> $provider_code ,
                 'scope'=> $scope
         );
