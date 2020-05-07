@@ -618,7 +618,6 @@ class MasterController extends Controller
                         'id_number'=> $userData->id_number ,
                         'passport_number'=> ''
                     ],
-                'identifier'=> ,
                 'provider_code'=> $provider_code ,
                 'scope'=> $scope
         );
