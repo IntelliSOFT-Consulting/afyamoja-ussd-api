@@ -140,7 +140,7 @@ class MasterController extends Controller
                     $request = self::request('patient_profile', $userData, $userSession->access_token);
                     if ($request) {
                         $placeHolders = ['_name', '_age','_allergies','_conditions'];
-                        $content = [ $name, $age,$request->data->allergy, ''];
+                        $content = [ $name, $age, $request->data->allergy, ''];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
                         return str_replace($placeHolders, $content, self::menuItem($level, 1));
                     } else {
@@ -163,7 +163,7 @@ class MasterController extends Controller
                 case $level == 6 && $text == 4:
                     $request = self::request('full_medical_history', $userData, $userSession->access_token);
                     if ($request) {
-                        Sms::sendSMS($_POST['phoneNumber'], str_replace('_url', $request->data->short_link, self::smsItem('medical_history')));
+                        Sms::sendSMS($_POST['phoneNumber'], str_replace('_url', $request->data->shortLink, self::smsItem('medical_history')));
                     }
                     return self::menuItem($level, 3);
                     break;
@@ -292,7 +292,8 @@ class MasterController extends Controller
                 case $level == 88 && is_numeric($text) && strlen($text) == 4:
                     $request = self::request('forget_patient', $userData, $userSession->access_token);
                     if ($request) {
-                        Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
+                        DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0]);
+                        Sms::sendSMS($_POST['phoneNumber'], self::smsItem('forget'));
                         return self::menuItem($level, 0);
                     } else {
                         self::level(999, 1);
