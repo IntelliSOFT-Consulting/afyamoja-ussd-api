@@ -63,11 +63,12 @@ class MasterController extends Controller
                         if ($last_name) {
                             self::level(2, $text);
                             DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['first_name' => $first_name,'last_name'=>$last_name]);
+                            return self::menuItem($level, 0);
                         } else {
                             return self::menuItem(0, 1);
                         }
                     }
-                    return  self::menuItem($level, 0);
+                    return  self::menuItem(0, 1);
                     break;
                 case $level == 2 && is_numeric($text) && strlen($text) > 5:
                     self::level(3, $text);
