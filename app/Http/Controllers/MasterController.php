@@ -391,8 +391,8 @@ class MasterController extends Controller
                         self::level(6, 1);
                         return self::menuItem(5, 1);
                     } else {
-                        self::level(160, 0);
-                        return self::menuItem(76, 0);
+                        self::level(76, 5);
+                        return self::menuItem(6, 5);
                     }
                     break;
                 case $level == 260:
@@ -471,6 +471,7 @@ class MasterController extends Controller
                     } elseif (strlen($text) == 4 && $text == $userData->pin) {
                         $request = self::removeKin($userData, $userSession->access_token, $userSession->dependent);
                         if ($request) {
+                            self::level(264, $text);
                             return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 0));
                         } else {
                             self::level(999, $text);
@@ -479,6 +480,15 @@ class MasterController extends Controller
                     } else {
                         self::level(999, $text);
                         return self::menuItem(0, 2) ;
+                    }
+                    break;
+                case $level == 264:
+                    if (strlen($text) == 2 && $text == 00) {
+                        self::level(6, 1);
+                        return self::menuItem(5, 1);
+                    } elseif ($text == 0) {
+                        self::level(76, 1);
+                        return self::menuItem(6, 5);
                     }
                     break;
                 case $level == 999:
