@@ -404,7 +404,7 @@ class MasterController extends Controller
                             self::level(261, $text);
                             $dependantAge = date("Y", strtotime($dependents[$text-1]->date_of_birth));
                             $dependantName = $dependents[$text-1]->first_name." ".$dependents[$text-1]->last_name;
-                            DB::table('sessions')->where('sessionId', $userSession->access_token)->update(['dependent' => $dependantName,'dependent_age' => $dependantAge]);
+                            DB::table('sessions')->where('sessionId', $userSession->sessionId)->update(['dependent' => $dependantName,'dependent_age' => $dependantAge]);
                             return str_replace("_dependent", $dependantName, self::menuItem($level, 0));
                         } else {
                             $dependentList = "";
@@ -441,10 +441,10 @@ class MasterController extends Controller
                             Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
                             return str_replace($placeHolders, $content, self::menuItem($level, 1));
                         } else {
-                            self::level(262, 1);
                             return str_replace("_dependent", $userSession->dependent, self::menuItem(260, 0));
                         }
                     } elseif ($text == 2) {
+                        self::level(262, 1);
                         return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 0));
                     } else {
                         self::level(999, $text);
@@ -454,10 +454,10 @@ class MasterController extends Controller
                 case $level == 262:
                     if ($text == 1) {
                         self::level(263, $text);
-                        return self::menuItem(262, 0);
+                        return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 0));
                     } elseif ($text == 2) {
                         self::level(263, $text);
-                        return self::menuItem(262, 1);
+                        return self::menuItem($level, 1);
                     } else {
                         self::level(999, $text);
                         return self::menuItem(0, 2);
@@ -476,8 +476,8 @@ class MasterController extends Controller
                             return self::menuItem(0, 2) ;
                         }
                     } else {
-                        self::level(6, 1);
-                        return self::menuItem(5, 1);
+                        self::level(999, $text);
+                        return self::menuItem(0, 2) ;
                     }
                     break;
                 case $level == 999:
