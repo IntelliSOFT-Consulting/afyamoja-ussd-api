@@ -139,8 +139,8 @@ class MasterController extends Controller
                 case $level == 6 && $text == 2:
                     $request = self::request('patient_profile', $userData, $userSession->access_token);
                     if ($request) {
-                        $placeHolders = ['_name', '_age','_allergies','_conditions'];
-                        $content = [ $name, $age, json_encode($request->data->allergy), ''];
+                        $placeHolders = ['_name', '_age','_allergies','_url'];
+                        $content = [ $name, $age, json_encode($request->data->allergy), $request->data->short_link];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
                         return str_replace($placeHolders, $content, self::menuItem($level, 1));
                     } else {
@@ -151,7 +151,7 @@ class MasterController extends Controller
                 case $level == 6 && $text == 3:
                     $request = self::request('last_visit', $userData, $userSession->access_token);
                     if ($request) {
-                        $placeHolders = ['_visit', '_url'];
+                        $placeHolders = ['_content', '_url'];
                         $content = [$request->data->summary,$request->data->shortLink];
                         return str_replace($placeHolders, $content, self::menuItem($level, 2));
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('visit')));
