@@ -622,7 +622,7 @@ class MasterController extends Controller
                 'scope'=> $scope
         );
         $data_string = json_encode($curl_post_data);
-        $share = json_decode(self::generalAPI($data_string, $userSession->token, 'patients/start_visit/'));
+        $share = json_decode(self::generalAPI($data_string, $userSession->access_token, 'patients/start_visit/'));
         if ($share && $share->status == "Success") {
             return $share;
         } else {
