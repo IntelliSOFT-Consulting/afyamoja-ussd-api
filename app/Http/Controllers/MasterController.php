@@ -281,6 +281,9 @@ class MasterController extends Controller
                     $resetPin = self::resetPin($userData, $userSession->access_token, $text);
                     if ($resetPin) {
                         DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $text]);
+                        $placeHolders = ['_name', '_pin'];
+                        $content = [$name,$text];
+                        Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
                         return self::menuItem($level, 0);
                     } else {
                         self::level(999, 1);
