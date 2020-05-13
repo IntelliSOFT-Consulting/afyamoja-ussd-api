@@ -417,7 +417,7 @@ class MasterController extends Controller
                         return self::menuItem(5, 1);
                     } elseif (is_numeric($text) && $text != 0) {
                         $dependents = json_decode($userSession->kin);
-                        if ($dependents && count($dependents) > $text && $dependents[$text-1]->first_name) {
+                        if ($dependents && count($dependents) => $text && $dependents[$text-1]->first_name) {
                             self::level(261, $text);
                             $dependantAge = date("Y", strtotime($dependents[$text-1]->date_of_birth));
                             $dependantName = $dependents[$text-1]->first_name." ".$dependents[$text-1]->last_name;
