@@ -282,7 +282,12 @@ class MasterController extends Controller
                 case $level == 81:
                     if ($text == 1 || $text == 2) {
                         $share = self::shareProfile($userSession,$userData, $text);
-                        return $share ? self::menuItem($level, 0) : self::menuItem($level, 1);
+                        if($share){
+                            Sms::sendSMS($_POST['phoneNumber'], self::smsItem('share'));
+                            return self::menuItem($level, 0)
+                        } else{
+                            return self::menuItem($level, 1);
+                        }
                     } else {
                         return self::menuItem(71, 2);
                     }
@@ -488,6 +493,7 @@ class MasterController extends Controller
                         $request = self::removeKin($userData, $userSession->access_token, $userSession->dependent);
                         if ($request) {
                             self::level(264, $text);
+                            Sms::sendSMS($phonenumber, str_replace("_name", $userSession->dependent, self::smsItem('remove_kin')));
                             return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 0));
                         } else {
                             self::level(999, $text);
