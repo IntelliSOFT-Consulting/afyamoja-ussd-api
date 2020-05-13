@@ -474,7 +474,7 @@ class MasterController extends Controller
                         return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 0));
                     } elseif ($text == 2) {
                         self::level(263, $text);
-                        return self::menuItem($level, 1);
+                        return str_replace("_dependent", $userSession->dependent, self::menuItem($level, 1));
                     } else {
                         self::level(999, $text);
                         return self::menuItem(0, 2);
