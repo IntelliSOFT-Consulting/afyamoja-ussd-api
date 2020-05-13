@@ -163,9 +163,9 @@ class MasterController extends Controller
                     $request = self::request('last_visit', $userData, $userSession->access_token);
                     if ($request) {
                         $placeHolders = ['_content', '_url'];
-                        $content = [$request->data->summary,$request->data->shortLink];
-                        return str_replace($placeHolders, $content, self::menuItem($level, 2));
+                        $content = [$request->data->summary,$request->data->shortLink];                    
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('visit')));
+                        return str_replace($placeHolders, $content, self::menuItem($level, 2));
                     } else {
                         self::level(63, 0);
                         return self::menuItem(63, 0);
