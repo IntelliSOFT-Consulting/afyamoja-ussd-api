@@ -98,7 +98,17 @@ class MasterController extends Controller
                     break;
                 case $level == 5 && $userData->terms_conditions == 0 && $text == 1:
                     $register = self::patientRegister($userData, $userSession->access_token);
-                    if ($register) {
+                    if($register && $register->status == "Failure"){
+                        $request = self::request('forgot_pin', $userData, $userSession->access_token);
+                        if ($request) {
+                            $placeHolders = ['_name', '_pin'];
+                            $content = [$name,$request->data->pin];
+                            DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $request->data->pin]);
+                            Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('registration')));
+                            return self::menuItem($level, 4);
+                        }
+                        return self::menuItem($level, 6);
+                    }elseif ($register) {
                         $placeHolders = ['_name', '_pin'];
                         $content = [$name,$register->data->pin];
 
@@ -560,6 +570,8 @@ class MasterController extends Controller
         $data_string = json_encode($curl_post_data);
         $register = json_decode(self::generalAPI($data_string, $token, 'patients/register_patient/'));
         if ($register && $register->status == "Success") {
+            return $register;
+        }elseif($register && $register->status == "Failure" &&  $register->message ==  "Identifiers for this person exists."){
             return $register;
         } else {
             return null;
