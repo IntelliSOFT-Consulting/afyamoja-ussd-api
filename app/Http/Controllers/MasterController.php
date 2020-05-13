@@ -284,7 +284,7 @@ class MasterController extends Controller
                         $share = self::shareProfile($userSession,$userData, $text);
                         if($share){
                             Sms::sendSMS($_POST['phoneNumber'], self::smsItem('share'));
-                            return self::menuItem($level, 0)
+                            return self::menuItem($level, 0);
                         } else{
                             return self::menuItem($level, 1);
                         }
