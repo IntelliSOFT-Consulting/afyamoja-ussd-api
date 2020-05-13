@@ -163,7 +163,7 @@ class MasterController extends Controller
                     $request = self::request('last_visit', $userData, $userSession->access_token);
                     if ($request) {
                         $placeHolders = ['_content', '_url'];
-                        $content = [$request->data->summary,$request->data->shortLink];                    
+                        $content = [$request->data->summary,$request->data->shortLink];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('visit')));
                         return str_replace($placeHolders, $content, self::menuItem($level, 2));
                     } else {
@@ -318,10 +318,10 @@ class MasterController extends Controller
                         DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0]);
                         Sms::sendSMS($_POST['phoneNumber'], self::smsItem('forget'));
                         return self::menuItem($level, 0);
-                    } else {
-                        self::level(999, 1);
-                        return self::menuItem(0, 2);
                     }
+
+                    self::level(999, 1);
+                    return self::menuItem(0, 2);
                     break;
                 case $level == 88 && (!is_numeric($text) || strlen($text) != 4):
                     return self::menuItem($level, 1);
@@ -530,8 +530,8 @@ class MasterController extends Controller
         if ($content) {
             return str_replace('_new', "\n", $content->text);
         } else {
-            self::level(6, 1);
-            return "CON Sorry, we are unable to process your request. \nEnter any key to go back ";
+            self::level(999, 1);
+            return "CON Sorry, the was an issue with your request. \n 0.Go Home ";
         }
     }
 
