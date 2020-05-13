@@ -531,7 +531,7 @@ class MasterController extends Controller
             return str_replace('_new', "\n", $content->text);
         } else {
             self::level(999, 1);
-            return "CON Sorry, the was an issue with your request. \n 0.Go Home ";
+            return "CON Sorry, there was an issue with your request. \n 0.Go Home ";
         }
     }
 
