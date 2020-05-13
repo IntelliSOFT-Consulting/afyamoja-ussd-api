@@ -243,23 +243,27 @@ class MasterController extends Controller
                     DB::table('questions')->insert(['msisdn' => $_POST['phoneNumber'],'question' => $text]);
                     return self::menuItem($level, 0);
                     break;
-                case $level == 76 && $text == 1:
-                    self::level(160, $text);
-                    DB::insert('insert into dependents (parent_id,sessionId) values (?,?)', [$userData->id,$sessionId]);
-                    return self::menuItem($level, 0);
-                    break;
-                case $level == 76 && $text == 2:
-                    self::level(260, $text);
-                    $dependents = self::dependents($userData, $userSession->access_token);
-                    $dependentList = "";
-                    if ($dependents) {
-                        DB::table('sessions')->where('sessionId', $userSession->sessionId)->update(['kin' => json_encode($dependents)]);
-                        for ($i = 0;$i < count($dependents);$i++) {
-                            $number = $i+1;
-                            $dependentList .= $number.".".$dependents[$i]->first_name." ".$dependents[$i]->last_name."\n";
+                case $level == 76 :
+                    if($text == 1){
+                        self::level(160, $text);
+                        DB::insert('insert into dependents (parent_id,sessionId) values (?,?)', [$userData->id,$sessionId]);
+                        return self::menuItem($level, 0);
+                    }elseif($text == 2){
+                        self::level(260, $text);
+                        $dependents = self::dependents($userData, $userSession->access_token);
+                        $dependentList = "";
+                        if ($dependents) {
+                            DB::table('sessions')->where('sessionId', $userSession->sessionId)->update(['kin' => json_encode($dependents)]);
+                            for ($i = 0;$i < count($dependents);$i++) {
+                                $number = $i+1;
+                                $dependentList .= $number.".".$dependents[$i]->first_name." ".$dependents[$i]->last_name."\n";
+                            }
                         }
+                        return str_replace("_dependents", $dependentList, self::menuItem($level, 1));
+                    } else {
+                        self::level(76, 5);
+                        return self::menuItem(6, 5);
                     }
-                    return str_replace("_dependents", $dependentList, self::menuItem($level, 1));
                     break;
                 case $level == 77 && $text == $userData->pin:
                     self::level(87, $text);
@@ -318,7 +322,6 @@ class MasterController extends Controller
                     return self::menuItem($level, 1);
                     break;
                 case $level == 160:
-
                     if ($text) {
                         $names = explode(" ", $text);
                         $first_name = $names[0];
@@ -414,7 +417,7 @@ class MasterController extends Controller
                         return self::menuItem(5, 1);
                     } elseif (is_numeric($text) && $text != 0) {
                         $dependents = json_decode($userSession->kin);
-                        if ($dependents && count($dependents) < $text && $dependents[$text-1]->first_name) {
+                        if ($dependents && count($dependents) > $text && $dependents[$text-1]->first_name) {
                             self::level(261, $text);
                             $dependantAge = date("Y", strtotime($dependents[$text-1]->date_of_birth));
                             $dependantName = $dependents[$text-1]->first_name." ".$dependents[$text-1]->last_name;
