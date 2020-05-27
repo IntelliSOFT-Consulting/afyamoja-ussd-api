@@ -751,7 +751,8 @@ class MasterController extends Controller
         $curl_response = curl_exec($curl);
         $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        Log::info("api response --- ".json_encode($curl_response));
+        Log::info("http code: ".$httpcode." api response --- ".$curl_response);
+        //Log::info("api response --- ".json_encode($curl_response));
         if ($httpcode != 500 && $httpcode != 401) {
             return $curl_response;
         } else {
