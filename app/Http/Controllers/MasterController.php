@@ -103,7 +103,7 @@ class MasterController extends Controller
                         if ($request) {
                             $placeHolders = ['_name', '_pin'];
                             $content = [$name,$request->data->pin];
-                            DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $request->data->pin]);
+                            DB::table('customers')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => $request->data->pin,'terms_conditions' => 1]);
                             Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('registration')));
                             return self::menuItem($level, 4);
                         }
@@ -745,7 +745,7 @@ class MasterController extends Controller
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_post_data);
         }
-        curl_setopt($curl, CURLOPT_HEADER, 1);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($curl, CURLOPT_TIMEOUT, 3);
