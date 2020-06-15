@@ -789,7 +789,6 @@ class MasterController extends Controller
         $curl_response = curl_exec($curl);
         $curl_response = json_decode($curl_response);
 
-        Log::info(" auth response --- ".$curl_response);
         if ($curl_response) {
             return $curl_response->access_token ;
         }
