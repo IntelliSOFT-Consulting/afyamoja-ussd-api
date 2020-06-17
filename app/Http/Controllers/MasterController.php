@@ -739,7 +739,7 @@ class MasterController extends Controller
         $url = env("url");
         $url = $url.$path;
 
-        Log::info("api data --- ".$curl_post_data);
+        Log::info($path." data --- ".$curl_post_data);
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
