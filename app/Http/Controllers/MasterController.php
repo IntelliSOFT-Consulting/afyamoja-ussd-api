@@ -63,7 +63,7 @@ class MasterController extends Controller
                     self::forgotPassword(0);
                     return self::menuItem(5, 0);
                     break;
-                case $level == 1 && $userData->terms_conditions == 0:
+                case $level == 1 && $userData->terms_conditions == 0 && $userData->isSynced == 1:
                     if ($text) {
                         $names = explode(" ", $text);
                         $first_name = $names[0];
