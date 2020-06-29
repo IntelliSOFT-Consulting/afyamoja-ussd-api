@@ -14,4 +14,5 @@ use Illuminate\Http\Request;
 */
 //header('Access-Control-Allow-Origin: *');
 Route::post('/', 'MasterController@index');
+Route::get('/sync_users', 'MasterController@sync');
 Route::post('/sendSms', 'SMSController@index');
