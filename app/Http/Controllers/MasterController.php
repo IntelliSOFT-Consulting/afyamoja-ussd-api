@@ -304,15 +304,15 @@ class MasterController extends Controller
                         $content = [$name,$text];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
                         return self::menuItem($level, 0);
-                    } else {
-                        self::level(999, 1);
-                        return self::menuItem(0, 2);
                     }
+                    self::level(999, 1);
+                    return self::menuItem(0, 2);
+
                     break;
                 case $level == 87 && (!is_numeric($text) || strlen($text) == 4):
                     return self::menuItem($level, 1);
                     break;
-                case $level == 88 :
+                case $level == 88:
                     if (Hash::check($text, $userData->pin) && is_numeric($text) && strlen($text) == 4) {
                         $request = self::request('forget_patient', $userData, $userSession->access_token);
                         if ($request) {
@@ -837,13 +837,11 @@ class MasterController extends Controller
 
     public function processRegistration($user)
     {
-        Log::info("point 1");
+        //Log::info("point 1");
         $all_tokens = DB::table('tokens')->where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->latest()->first();
         $token = $all_tokens ? $all_tokens->access_token : self::accessToken();
 
         $name = $user->first_name." ".$user->last_name;
-
-        Log::info("point 2");
 
         $register = self::patientRegister($user, $token);
         if ($register && $register->status == "Failure") {
@@ -854,6 +852,5 @@ class MasterController extends Controller
         } elseif ($register) {
             self::updatePatient($name, $register->data->pin, $user->phonenumber);
         }
-        Log::info("point 3");
     }
 }
