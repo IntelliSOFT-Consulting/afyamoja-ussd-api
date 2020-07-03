@@ -591,7 +591,7 @@ class MasterController extends Controller
         $placeHolders = ['_name', '_pin'];
         $content = [$name,$pin];
 
-        DB::table('users')->where('phonenumber', $phonenumber)->update(['pin' => Hash::make($pin),'terms_conditions_sent' => 1 ,'terms_conditions_sent' => 1, 'status' => 1, 'isSynced' => 1]);
+        DB::table('users')->where('phonenumber', $phonenumber)->update(['pin' => Hash::make($pin),'terms_conditions' => 1, 'status' => 1, 'isSynced' => 1]);
         Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('registration')));
     }
 
@@ -826,7 +826,7 @@ class MasterController extends Controller
     public function sync()
     {
         DB::table('users')->where('terms_conditions',1)
-            ->where('terms_conditions_sent',0)
+            ->where('status',1)
             ->where('isSynced', 0)
             ->chunkById(10, function ($users) {
                 foreach ($users as $user) {
