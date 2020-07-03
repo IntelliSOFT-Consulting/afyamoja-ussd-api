@@ -591,7 +591,7 @@ class MasterController extends Controller
         $placeHolders = ['_name', '_pin'];
         $content = [$name,$pin];
 
-        DB::table('users')->where('phonenumber', $phonenumber)->update(['pin' => Hash::make($pin),'terms_conditions' => 1, 'status' => 1, 'isSynced' => 1]);
+        DB::table('users')->where('phonenumber', $phonenumber)->update(['pin' => Hash::make($pin),'terms_conditions_sent' => 1 ,'terms_conditions_sent' => 1, 'status' => 1, 'isSynced' => 1]);
         Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('registration')));
     }
 
@@ -825,9 +825,10 @@ class MasterController extends Controller
 
     public function sync()
     {
-        DB::table('users')->where('isSynced', 0)
-            ->orderBy('id', 'asc')
-            ->chunkById(50, function ($users) {
+        DB::table('users')->where('terms_conditions',1)
+            ->where('terms_conditions_sent',0)
+            ->where('isSynced', 0)
+            ->chunkById(10, function ($users) {
                 foreach ($users as $user) {
                     self::processRegistration($user);
                     $last_id = $user->id;
@@ -851,6 +852,8 @@ class MasterController extends Controller
             }
         } elseif ($register) {
             self::updatePatient($name, $register->data->pin, $user->phonenumber);
+        }else{
+          DB::table('users')->where('phonenumber', $phonenumber)->update(['terms_conditions' => 1, 'status' => 1]);
         }
     }
 }
