@@ -73,8 +73,6 @@ class MasterController extends Controller
                             self::level(2, $text);
                             DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['first_name' => $first_name,'last_name'=>$last_name]);
                             return self::menuItem($level, 0);
-                        } else {
-                            return self::menuItem(0, 1);
                         }
                     }
                     return  self::menuItem(0, 1);
@@ -316,7 +314,7 @@ class MasterController extends Controller
                     if (Hash::check($text, $userData->pin) && is_numeric($text) && strlen($text) == 4) {
                         $request = self::request('forget_patient', $userData, $userSession->access_token);
                         if ($request) {
-                            DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0, 'terms_conditions' => 0 , 'terms_conditions_sent' => 0]);
+                            DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0, 'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
                             Sms::sendSMS($_POST['phoneNumber'], self::smsItem('forget'));
                             return self::menuItem($level, 0);
                         }
