@@ -149,6 +149,7 @@ class MasterController extends Controller
                 case $level == 6 && $text == 2:
                     $request = self::request('patient_profile', $userData, $userSession->access_token);
                     if ($request) {
+                        self::level(999, $text);
                         $placeHolders = ['_name', '_age','_allergies','_url'];
                         $content = [ $name, $age, json_encode($request->data->allergy), $request->data->short_link];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('profile')));
@@ -161,6 +162,7 @@ class MasterController extends Controller
                 case $level == 6 && $text == 3:
                     $request = self::request('last_visit', $userData, $userSession->access_token);
                     if ($request) {
+                        self::level(999, $text);
                         $placeHolders = ['_content', '_url'];
                         $content = [$request->data->summary,$request->data->shortLink];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('visit')));
@@ -171,6 +173,7 @@ class MasterController extends Controller
                     }
                     break;
                 case $level == 6 && $text == 4:
+                    self::level(999, $text);
                     $request = self::request('full_medical_history', $userData, $userSession->access_token);
                     if ($request) {
                         Sms::sendSMS($_POST['phoneNumber'], str_replace('_url', $request->data->shortLink, self::smsItem('medical_history')));
@@ -199,6 +202,7 @@ class MasterController extends Controller
                     return self::menuItem($level, 8);
                     break;
                 case $level == 6 && $text == 10:
+                    self::level(999, $text);
                     return self::menuItem($level, 9);
                     break;
                 case $level == 6 && $text == 00:
@@ -223,7 +227,8 @@ class MasterController extends Controller
                      ($level == 75 && is_numeric($text) && $text == 0) ||
                      ($level == 78 && $text != 1) ||
                      ($level == 79 && $text == 0) ||
-                     ($level == 71 && $text == 0):
+                     ($level == 71 && $text == 0)||
+                     ($level == 76 && $text == 0):
                     self::level(6, 1);
                     return self::menuItem(5, 1);
                     break;
