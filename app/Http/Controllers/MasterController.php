@@ -108,6 +108,9 @@ class MasterController extends Controller
                 case $level == 4 && $text != 1 && $text != 2:
                     return self::menuItem(3, 0);
                     break;
+                case $level == 5 && $userData->terms_conditions == 0 && $text == 2:
+                    return self::menuItem($level, 7);
+                    break;
                 case $level == 5 && $userData->terms_conditions == 0 && $text == 1:
                     self::processRegistration($userData);
                     return self::menuItem($level, 4);
@@ -525,6 +528,7 @@ class MasterController extends Controller
         if ($content) {
             return str_replace('_new', "\n", $content->text);
         } else {
+            echo $level.'-'.$choice;
             self::level(999, 1);
             return "CON Sorry, there was an issue with your request. \n 0.Go Home ";
         }
@@ -540,7 +544,6 @@ class MasterController extends Controller
     {
         if ($level == 0) {
             DB::insert('insert into users (phonenumber) values (?)', [$_POST['phoneNumber']]);
-            self::addSession($choice);
         } else {
             DB::table('sessions')->where('sessionId', $_POST['sessionId'])
             ->update(['text' => $_POST['text'],'level' => $level,'choice' => $choice,'updated_at' => date("Y-m-d H:i:s", time())]);
@@ -823,8 +826,8 @@ class MasterController extends Controller
 
     public function sync()
     {
-        DB::table('users')->where('terms_conditions',1)
-            ->where('status',1)
+        DB::table('users')->where('terms_conditions', 1)
+            ->where('status', 1)
             ->where('isSynced', 0)
             ->chunkById(10, function ($users) {
                 foreach ($users as $user) {
@@ -850,8 +853,8 @@ class MasterController extends Controller
             }
         } elseif ($register) {
             self::updatePatient($name, $register->data->pin, $user->phonenumber);
-        }else{
-          DB::table('users')->where('phonenumber', $phonenumber)->update(['terms_conditions' => 1, 'status' => 1]);
+        } else {
+            DB::table('users')->where('phonenumber', $user->phonenumber)->update(['terms_conditions' => 1, 'status' => 1]);
         }
     }
 }
