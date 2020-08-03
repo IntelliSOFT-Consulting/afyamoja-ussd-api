@@ -286,14 +286,14 @@ class MasterController extends Controller
                     break;
                 case $level == 81:
                     if ($text == 1 || $text == 2) {
+                        self::level(999, $text);
                         $share = self::shareProfile($userSession, $userData, $text);
                         if ($share) {
                             Sms::sendSMS($_POST['phoneNumber'], self::smsItem('share'));
                             return self::menuItem($level, 0);
-                        } else {
-                            self::level(999, $text);
-                            return self::menuItem($level, 1);
                         }
+
+                        return self::menuItem($level, 1);
                     } else {
                         return str_replace("_provider", $userSession->provider, self::menuItem(71, 2));
                     }
@@ -868,5 +868,11 @@ class MasterController extends Controller
         } else {
             DB::table('users')->where('phonenumber', $user->phonenumber)->update(['terms_conditions' => 1, 'status' => 1]);
         }
+    }
+
+    public function retrievePatients()
+    {
+        $all_tokens = DB::table('tokens')->where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->latest()->first();
+        $token = $all_tokens ? $all_tokens->access_token : self::accessToken();
     }
 }
