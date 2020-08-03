@@ -255,7 +255,7 @@ class MasterController extends Controller
                     } elseif ($text == 2) {
                         self::level(260, $text);
                         $dependents = self::dependents($userData, $userSession->access_token);
-                        $dependentList = "";
+                        $dependentList = "There are currently no dependents.";
                         if ($dependents) {
                             DB::table('sessions')->where('sessionId', $userSession->sessionId)->update(['kin' => json_encode($dependents)]);
                             for ($i = 0;$i < count($dependents);$i++) {
@@ -291,10 +291,11 @@ class MasterController extends Controller
                             Sms::sendSMS($_POST['phoneNumber'], self::smsItem('share'));
                             return self::menuItem($level, 0);
                         } else {
+                            self::level(999, $text);
                             return self::menuItem($level, 1);
                         }
                     } else {
-                        return self::menuItem(71, 2);
+                        return str_replace("_provider", $userSession->provider, self::menuItem(71, 2));
                     }
                     break;
                 case $level == 85:
@@ -379,8 +380,10 @@ class MasterController extends Controller
                                 DB::table('dependents')->where('sessionId', $sessionId)->update(['status' => 1]);
                                 Sms::sendSMS($phonenumber, str_replace("_name", $name_kin, self::smsItem('kin')));
                                 return str_replace("_name", $name_kin, self::menuItem($level, 1));
+                            } else {
+                                self::level(999, $text);
+                                return self::menuItem($level, 2);
                             }
-                            return self::menuItem($level, 2);
                         }
                     } else {
                         return self::menuItem(2, 1);
@@ -517,8 +520,13 @@ class MasterController extends Controller
                     }
                     break;
                 case $level == 999:
-                    self::level(6, 0);
-                    return self::menuItem(5, 1);
+                    if ($text == 0) {
+                        self::level(6, 0);
+                        return self::menuItem(5, 1);
+                    } else {
+                        self::level(999, $text);
+                        return "CON Sorry, there was an issue with your request. \n 0.Go Home ";
+                    }
                     break;
                 default:
                     self::level(5, $text);
@@ -533,7 +541,6 @@ class MasterController extends Controller
         if ($content) {
             return str_replace('_new', "\n", $content->text);
         } else {
-            echo $level.'-'.$choice;
             self::level(999, 1);
             return "CON Sorry, there was an issue with your request. \n 0.Go Home ";
         }
