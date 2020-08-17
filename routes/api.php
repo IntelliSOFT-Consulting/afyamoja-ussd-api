@@ -15,4 +15,10 @@ use Illuminate\Http\Request;
 //header('Access-Control-Allow-Origin: *');
 Route::post('/', 'MasterController@index');
 Route::get('/sync_users', 'MasterController@sync');
-Route::post('/sendSms', 'SMSController@index');
+Route::get('/retrieve_patients', 'MasterController@syncPatients');
+
+//Route::post('/sendSms', 'SMSController@index');
+Route::post('/receiveSms', 'SMSController@index');
+
+Route::post('/login', 'UserController@login');
+Route::post('/registration', 'UserController@registration');

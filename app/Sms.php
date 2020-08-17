@@ -53,4 +53,9 @@ class SMS extends Model
         $model->status = $status;
         $model->save();
     }
+
+    public static function saveFeedback($payload){
+
+      Log::info("Payload: ".$payload);
+    }
 }
