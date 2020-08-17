@@ -925,7 +925,7 @@ class MasterController extends Controller
                   self::generalAPI($data_string, $token, 'patients/sync_patient/');
 
                   $placeHolders = ['_name', '_pin'];
-                  $content = [$patient->first_name' '.$patient->last_name,$pin];
+                  $content = [$patient->first_name.' '.$patient->last_name,$pin];
                   //Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('reset_pin')));
 
             }
