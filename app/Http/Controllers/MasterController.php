@@ -263,7 +263,7 @@ class MasterController extends Controller
                                 $dependentList .= $number.".".$dependents[$i]->first_name." ".$dependents[$i]->last_name."\n";
                             }
                         }else{
-                          $dependentList = "There are currently no dependents."
+                          $dependentList = "There are currently no dependents.";
                         }
                         return str_replace("_dependents", $dependentList, self::menuItem($level, 1));
                     } else {
