@@ -262,8 +262,8 @@ class MasterController extends Controller
                                 $number = $i+1;
                                 $dependentList .= $number.".".$dependents[$i]->first_name." ".$dependents[$i]->last_name."\n";
                             }
-                        }else{
-                          $dependentList = "There are currently no dependents.";
+                        } else {
+                            $dependentList = "There are currently no dependents.";
                         }
                         return str_replace("_dependents", $dependentList, self::menuItem($level, 1));
                     } else {
@@ -810,6 +810,9 @@ class MasterController extends Controller
         curl_setopt($curl, CURLOPT_POSTFIELDS, "client_id=$client_id&client_secret=$client_secret&grant_type=password&username=$username&password=$password");
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, false);
 
         $curl_response = curl_exec($curl);
         $curl_response = json_decode($curl_response);
@@ -881,14 +884,14 @@ class MasterController extends Controller
         $patients = json_decode($response);
 
         if ($patients) {
-            foreach ($patients as $patient){
+            foreach ($patients as $patient) {
                 $id_number;
                 $phonenumber;
 
                 $identifiers = $patient->identifiers;
 
                 foreach ($identifiers as $identify) {
-                  switch ($identify->identifier_type) {
+                    switch ($identify->identifier_type) {
                     case 'ID':
                       $id_number = $identify->identifier_value;
                       break;
@@ -914,20 +917,19 @@ class MasterController extends Controller
                                   'isSynced' => 1
                                 ]);
 
-                  $objectPatient = (object) [
+                $objectPatient = (object) [
                       'msisdn'=> [$phonenumber],
                       'id_number'=> $id_number ,
                       'passport_number'=> ''
                   ];
 
-                  $curl_post_data = array('patient'=> $objectPatient, 'sync_status' => 1,'pin' =>$pin);
-                  $data_string = json_encode($curl_post_data);
-                  self::generalAPI($data_string, $token, 'patients/sync_patient/');
+                $curl_post_data = array('patient'=> $objectPatient, 'sync_status' => 1,'pin' =>$pin);
+                $data_string = json_encode($curl_post_data);
+                self::generalAPI($data_string, $token, 'patients/sync_patient/');
 
-                  $placeHolders = ['_name', '_pin'];
-                  $content = [$patient->first_name.' '.$patient->last_name,$pin];
-                  //Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('reset_pin')));
-
+                $placeHolders = ['_name', '_pin'];
+                $content = [$patient->first_name.' '.$patient->last_name,$pin];
+                //Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('reset_pin')));
             }
         }
     }
