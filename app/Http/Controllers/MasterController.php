@@ -128,10 +128,10 @@ class MasterController extends Controller
                     if (Hash::check($text, $userData->pin)) {
                         self::level(6, 1);
                         return self::menuItem($level, 1);
-                    } else {
-                        self::level($level, 3);
-                        return self::menuItem($level, 2);
                     }
+
+                    return self::menuItem($level, 2);
+
                     break;
                 case $level == 6 && strlen($text) > 5 && $userSession->forgot_password == 1:
                     self::level(7, $text);
