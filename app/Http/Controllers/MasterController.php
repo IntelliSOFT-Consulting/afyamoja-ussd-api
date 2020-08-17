@@ -255,7 +255,7 @@ class MasterController extends Controller
                     } elseif ($text == 2) {
                         self::level(260, $text);
                         $dependents = self::dependents($userData, $userSession->access_token);
-                        $dependentList ;
+                        $dependentList = '';
                         if ($dependents) {
                             DB::table('sessions')->where('sessionId', $userSession->sessionId)->update(['kin' => json_encode($dependents)]);
                             for ($i = 0;$i < count($dependents);$i++) {
