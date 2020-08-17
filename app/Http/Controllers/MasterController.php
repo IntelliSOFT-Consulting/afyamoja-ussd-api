@@ -255,13 +255,15 @@ class MasterController extends Controller
                     } elseif ($text == 2) {
                         self::level(260, $text);
                         $dependents = self::dependents($userData, $userSession->access_token);
-                        $dependentList = "There are currently no dependents.";
+                        $dependentList ;
                         if ($dependents) {
                             DB::table('sessions')->where('sessionId', $userSession->sessionId)->update(['kin' => json_encode($dependents)]);
                             for ($i = 0;$i < count($dependents);$i++) {
                                 $number = $i+1;
                                 $dependentList .= $number.".".$dependents[$i]->first_name." ".$dependents[$i]->last_name."\n";
                             }
+                        }else{
+                          $dependentList = "There are currently no dependents."
                         }
                         return str_replace("_dependents", $dependentList, self::menuItem($level, 1));
                     } else {
@@ -870,9 +872,63 @@ class MasterController extends Controller
         }
     }
 
-    public function retrievePatients()
+    public function syncPatients()
     {
         $all_tokens = DB::table('tokens')->where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->latest()->first();
         $token = $all_tokens ? $all_tokens->access_token : self::accessToken();
+
+        $response = self::generalAPI(null, $token, "patients/summary/?page_size=1");
+        $patients = json_decode($response);
+
+        if ($patients) {
+            foreach ($patients as $patient){
+                $id_number;
+                $phonenumber;
+
+                $identifiers = $patient->identifiers;
+
+                foreach ($identifiers as $identify) {
+                  switch ($identify->identifier_type) {
+                    case 'ID':
+                      $id_number = $identify->identifier_value;
+                      break;
+                    case 'PHO':
+                      $phonenumber = $identify->identifier_value;
+                      break;
+                  }
+                }
+                $pin = mt_rand(1000, 9999);
+                $pinHash = Hash::make($pin);
+
+                $addPatient =   DB::table('users')->insert([
+                                  'phonenumber' => $phonenumber,
+                                  'first_name' => $patient->first_name,
+                                  'last_name' => $patient->last_name,
+                                  'dob' => date('dmY', strtotime($patient->date_of_birth)),
+                                  'gender' => $patient->gender,
+                                  'id_number' => $id_number,
+                                  'pin' => $pinHash,
+                                  'terms_conditions_sent' => 1,
+                                  'terms_conditions' => 1,
+                                  'status' => 1,
+                                  'isSynced' => 1
+                                ]);
+
+                  $objectPatient = (object) [
+                      'msisdn'=> [$phonenumber],
+                      'id_number'=> $id_number ,
+                      'passport_number'=> ''
+                  ];
+
+                  $curl_post_data = array('patient'=> $objectPatient, 'sync_status' => 1,'pin' =>$pin);
+                  $data_string = json_encode($curl_post_data);
+                  self::generalAPI($data_string, $token, 'patients/sync_patient/');
+
+                  $placeHolders = ['_name', '_pin'];
+                  $content = [$patient->first_name' '.$patient->last_name,$pin];
+                  //Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('reset_pin')));
+
+            }
+        }
     }
 }
