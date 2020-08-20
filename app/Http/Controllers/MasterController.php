@@ -207,10 +207,10 @@ class MasterController extends Controller
                     self::level(999, $text);
                     return self::menuItem($level, 9);
                     break;
-                case $level == 6 && && strlen($text) == 2 && $text == 00:
+                case $level == 6 && strlen($text) == 2 && $text == 00:
                     return self::menuItem(4, 0);
                     break;
-                case $level == 6 && && strlen($text) == 3 && $text == 000:
+                case $level == 6 && strlen($text) == 3 && $text == 000:
                     return self::menuItem(5, 5);
                     break;
                 case $level == 7 && is_numeric($text) && strlen($text) == 8 && $userSession->forgot_password == 1:
