@@ -22,3 +22,5 @@ Route::post('/receiveSms', 'SMSController@index');
 
 Route::post('/login', 'UserController@login');
 Route::post('/registration', 'UserController@registration');
+Route::post('/reset_pin', 'UserController@resetPin');
+Route::post('/feedback', 'FeedbackController@index');

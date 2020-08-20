@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use DB;
 use App\Sms;
+use App\User;
+use App\Token;
 use App\SystemLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -566,8 +568,8 @@ class MasterController extends Controller
 
     public function addSession($choice)
     {
-        $all_tokens = DB::table('tokens')->where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->latest()->first();
-        $access_token = $all_tokens ? $all_tokens->access_token : self::accessToken();
+        $access_token = Token::token();
+        ;
         DB::insert('insert into sessions (sessionId,access_token,phonenumber,level,text,choice)
                             values (?,?,?,?,?,?)', [$_POST['sessionId'],$access_token,$_POST['phoneNumber'],1,$_POST['text'],$choice]);
     }
@@ -789,52 +791,6 @@ class MasterController extends Controller
         }
     }
 
-
-    public function accessToken()
-    {
-        $url =env("url_auth");
-        $client_id=env("client_id");
-        $client_secret=env("client_secret");
-
-        $username = env("username");
-        $password = env("password");
-
-        if (!isset($client_id)||!isset($client_secret)) {
-            die("Please declare the client id and client secret as defined in the documentation");
-        }
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept:application/json','Content-Type:application/x-www-form-urlencoded'));
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, "client_id=$client_id&client_secret=$client_secret&grant_type=password&username=$username&password=$password");
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 120);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 60);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, false);
-
-        $curl_response = curl_exec($curl);
-        $curl_response = json_decode($curl_response);
-        $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        $request = new Request();
-        $request->replace([
-          'url' => 'oauth2/token/',
-          'http_code' => $httpcode ,
-          'payload' => 'confidential',
-          'response' => $curl_response ? 'valid' : 'invalid'  ,
-          'system' => 'SIL' ]);
-        SystemLog::store($request);
-
-        if ($curl_response) {
-            DB::table('tokens')->insert([ 'access_token' => $curl_response->access_token ]);
-            return $curl_response->access_token ;
-        }
-
-        return '';
-    }
-
     public function validateDate($date, $format = 'Y-m-d')
     {
         $d = \DateTime::createFromFormat($format, $date);
@@ -857,8 +813,7 @@ class MasterController extends Controller
     public function processRegistration($user)
     {
         //Log::info("point 1");
-        $all_tokens = DB::table('tokens')->where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->latest()->first();
-        $token = $all_tokens ? $all_tokens->access_token : self::accessToken();
+        $token = Token::token();
 
         $name = $user->first_name." ".$user->last_name;
 
@@ -877,8 +832,7 @@ class MasterController extends Controller
 
     public function syncPatients()
     {
-        $all_tokens = DB::table('tokens')->where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->latest()->first();
-        $token = $all_tokens ? $all_tokens->access_token : self::accessToken();
+        $token = Token::token();
 
         $response = self::generalAPI(null, $token, "patients/summary/?page_size=1");
         $patients = json_decode($response);
@@ -901,7 +855,6 @@ class MasterController extends Controller
                   }
                 }
                 $pin = mt_rand(1000, 9999);
-                $pinHash = Hash::make($pin);
 
                 $addPatient =   DB::table('users')->insert([
                                   'phonenumber' => $phonenumber,
@@ -910,7 +863,7 @@ class MasterController extends Controller
                                   'dob' => date('dmY', strtotime($patient->date_of_birth)),
                                   'gender' => $patient->gender,
                                   'id_number' => $id_number,
-                                  'pin' => $pinHash,
+                                  'pin' => Hash::make($pin),
                                   'terms_conditions_sent' => 1,
                                   'terms_conditions' => 1,
                                   'status' => 1,
