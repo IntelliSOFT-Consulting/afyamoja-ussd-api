@@ -20,6 +20,25 @@ class User extends Model
  */
     protected $hidden = ['id','status','pin','terms_conditions_sent','isSynced','updated_at','created_at','terms_conditions'];
 
+    public static function addPatient($patient,$phonenumber,$id_number,$pin){
+
+      $addPatient =  new User;
+      $addPatient->phonenumber = $phonenumber;
+      $addPatient->id_number = $id_number;
+      $addPatient->first_name = $patient->first_name;
+      $addPatient->last_name = $patient->last_name;
+      $addPatient->dob = date('dmY', strtotime($patient->date_of_birth));
+      $addPatient->gender = $patient->gender;
+      $addPatient->pin = Hash::make($pin);
+      $addPatient->terms_conditions_sent = 1;
+      $addPatient->terms_conditions = 1;
+      $addPatient->status = 1;
+      $addPatient->isSynced = 1;
+      $addPatient->save();
+
+      return $addPatient;
+    }
+
     public static function login($request)
     {
         $login = $request->json()->all();

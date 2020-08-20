@@ -73,7 +73,7 @@ class MasterController extends Controller
 
                         if ($last_name) {
                             self::level(2, $text);
-                            DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['first_name' => $first_name,'last_name'=>$last_name]);
+                            User::where('phonenumber', $_POST['phoneNumber'])->update(['first_name' => $first_name,'last_name'=>$last_name]);
                             return self::menuItem($level, 0);
                         }
                     }
@@ -81,7 +81,7 @@ class MasterController extends Controller
                     break;
                 case $level == 2 && is_numeric($text) && strlen($text) > 5:
                     self::level(3, $text);
-                    DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['id_number' => $text]);
+                    User::where('phonenumber', $_POST['phoneNumber'])->update(['id_number' => $text]);
                     return self::menuItem($level, 0);
                     break;
                 case $level == 2  && !is_numeric($text):
@@ -92,7 +92,7 @@ class MasterController extends Controller
                     $datevalidate  = self::validateDate($date);
                     if ($datevalidate && is_numeric($text) && strlen($text) == 8) {
                         self::level(4, $text);
-                        DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['dob' => $text]);
+                        User::where('phonenumber', $_POST['phoneNumber'])->update(['dob' => $text]);
                         return self::menuItem($level, 0);
                     }
                     return self::menuItem(2, 1);
@@ -100,10 +100,10 @@ class MasterController extends Controller
                 case $level == 4 && ($text == 1 || $text == 2):
                     self::level(5, $text);
                     $gender = $text == 1 ? 'male':'female';
-                    DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['gender' => $gender]);
+                    User::where('phonenumber', $_POST['phoneNumber'])->update(['gender' => $gender]);
                     $sendSMS = Sms::sendSMS($_POST['phoneNumber'], str_replace('_name', $name, self::smsItem('terms')));
                     if ($sendSMS['status'] == "success") {
-                        DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['terms_conditions_sent' => 1]);
+                        User::where('phonenumber', $_POST['phoneNumber'])->update(['terms_conditions_sent' => 1]);
                     }
                     return self::menuItem($level, 0);
                     break;
@@ -118,7 +118,7 @@ class MasterController extends Controller
                     return self::menuItem($level, 4);
                     break;
                 case $level == 5 && $userData->terms_conditions == 0 && $text != 1:
-                    DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['terms_conditions_sent' => 0]);
+                    User::where('phonenumber', $_POST['phoneNumber'])->update(['terms_conditions_sent' => 0]);
                     return self::menuItem(5, 5);
                     break;
                 case $level == 5 && $userData->terms_conditions == 1 && $text == 999:
@@ -207,8 +207,11 @@ class MasterController extends Controller
                     self::level(999, $text);
                     return self::menuItem($level, 9);
                     break;
-                case $level == 6 && $text == 00:
+                case $level == 6 && && strlen($text) == 2 && $text == 00:
                     return self::menuItem(4, 0);
+                    break;
+                case $level == 6 && && strlen($text) == 3 && $text == 000:
+                    return self::menuItem(5, 5);
                     break;
                 case $level == 7 && is_numeric($text) && strlen($text) == 8 && $userSession->forgot_password == 1:
                     self::forgotPassword(0);
@@ -216,7 +219,7 @@ class MasterController extends Controller
                     if ($request) {
                         $placeHolders = ['_name', '_pin'];
                         $content = [$name,$request->data->pin];
-                        DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => Hash::make($request->data->pin)]);
+                        User::where('phonenumber', $_POST['phoneNumber'])->update(['pin' => Hash::make($request->data->pin)]);
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
                         return str_replace("_name", $name, self::menuItem($level, 9990));
                     }
@@ -310,7 +313,7 @@ class MasterController extends Controller
                     $current_pin = trim($textContent[(count($textContent) - 2)]);
                     $resetPin = self::resetPin($userData, $current_pin, $userSession->access_token, $text);
                     if ($resetPin) {
-                        DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['pin' => Hash::make($text)]);
+                        User::where('phonenumber', $_POST['phoneNumber'])->update(['pin' => Hash::make($text)]);
                         $placeHolders = ['_name', '_pin'];
                         $content = [$name,$text];
                         Sms::sendSMS($_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
@@ -327,7 +330,7 @@ class MasterController extends Controller
                     if (Hash::check($text, $userData->pin) && is_numeric($text) && strlen($text) == 4) {
                         $request = self::request('forget_patient', $userData, $userSession->access_token);
                         if ($request) {
-                            DB::table('users')->where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0, 'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
+                            User::where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0, 'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
                             Sms::sendSMS($_POST['phoneNumber'], self::smsItem('forget'));
                             return self::menuItem($level, 0);
                         }
@@ -569,7 +572,7 @@ class MasterController extends Controller
     public function addSession($choice)
     {
         $access_token = Token::token();
-        ;
+
         DB::insert('insert into sessions (sessionId,access_token,phonenumber,level,text,choice)
                             values (?,?,?,?,?,?)', [$_POST['sessionId'],$access_token,$_POST['phoneNumber'],1,$_POST['text'],$choice]);
     }
@@ -608,7 +611,7 @@ class MasterController extends Controller
         $placeHolders = ['_name', '_pin'];
         $content = [$name,$pin];
 
-        DB::table('users')->where('phonenumber', $phonenumber)->update(['pin' => Hash::make($pin),'terms_conditions' => 1, 'status' => 1, 'isSynced' => 1]);
+        User::where('phonenumber', $phonenumber)->update(['pin' => Hash::make($pin),'terms_conditions' => 1, 'status' => 1, 'isSynced' => 1]);
         Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('registration')));
     }
 
@@ -799,7 +802,7 @@ class MasterController extends Controller
 
     public function sync()
     {
-        DB::table('users')->where('terms_conditions', 1)
+        User::where('terms_conditions', 1)
             ->where('status', 1)
             ->where('isSynced', 0)
             ->chunkById(10, function ($users) {
@@ -826,7 +829,7 @@ class MasterController extends Controller
         } elseif ($register) {
             self::updatePatient($name, $register->data->pin, $user->phonenumber);
         } else {
-            DB::table('users')->where('phonenumber', $user->phonenumber)->update(['terms_conditions' => 1, 'status' => 1]);
+            User::where('phonenumber', $user->phonenumber)->update(['terms_conditions' => 1, 'status' => 1]);
         }
     }
 
@@ -856,33 +859,19 @@ class MasterController extends Controller
                 }
                 $pin = mt_rand(1000, 9999);
 
-                $addPatient =   DB::table('users')->insert([
-                                  'phonenumber' => $phonenumber,
-                                  'first_name' => $patient->first_name,
-                                  'last_name' => $patient->last_name,
-                                  'dob' => date('dmY', strtotime($patient->date_of_birth)),
-                                  'gender' => $patient->gender,
-                                  'id_number' => $id_number,
-                                  'pin' => Hash::make($pin),
-                                  'terms_conditions_sent' => 1,
-                                  'terms_conditions' => 1,
-                                  'status' => 1,
-                                  'isSynced' => 1
-                                ]);
+                $addPatient = User::addPatient($patient, $phonenumber, $id_number, $pin);
 
-                $objectPatient = (object) [
-                      'msisdn'=> [$phonenumber],
-                      'id_number'=> $id_number ,
-                      'passport_number'=> ''
-                  ];
+                if ($addPatient) {
 
-                $curl_post_data = array('patient'=> $objectPatient, 'sync_status' => 1,'pin' =>$pin);
-                $data_string = json_encode($curl_post_data);
-                self::generalAPI($data_string, $token, 'patients/sync_patient/');
+                    $objectPatient = (object) ['msisdn'=> [$phonenumber],'id_number'=> $id_number,'passport_number'=> ''];
+                    $curl_post_data = array('patient'=> $objectPatient, 'sync_status' => 1,'pin' =>$pin);
+                    $data_string = json_encode($curl_post_data);
+                    $response = self::generalAPI($data_string, $token, 'patients/sync_patient/');
 
-                $placeHolders = ['_name', '_pin'];
-                $content = [$patient->first_name.' '.$patient->last_name,$pin];
-                //Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('reset_pin')));
+                    $placeHolders = ['_name', '_pin'];
+                    $content = [$patient->first_name.' '.$patient->last_name,$pin];
+                    //Sms::sendSMS($phonenumber, str_replace($placeHolders, $content, self::smsItem('reset_pin')));
+                }
             }
         }
     }
