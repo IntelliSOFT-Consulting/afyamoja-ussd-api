@@ -13,7 +13,7 @@ class SMS extends Model
 {
     protected $table = 'sms';
 
-    public static function sendSMS($recipients, $message)
+    public static function sendSMS($sender, $recipients, $message)
     {
         $username   = env("usernameAT");
         $apiKey     = env("apiKey");
@@ -23,14 +23,16 @@ class SMS extends Model
         // Get the SMS service
         $sms = $AT->sms();
 
+        $senderID = $sender == 'normal' ? env("senderID") : 20552;
+
         try {
-            $result = $sms->send(['to' => $recipients,'message' => $message,'from' => env("senderID")]);
+            $result = $sms->send(['to' => $recipients,'message' => $message,'from' => $senderID ]);
 
             $request = new Request();
             $request->replace([
               'url' => 'https://account.africastalking.com/',
               'http_code' => 200 ,
-              'payload' => "['to' => $recipients,'message' => $message]",
+              'payload' => "['to' => $recipients,'message' => $message, 'from' => $senderID]",
               'response' => json_encode($result) ,
               'system' => 'AT' ]);
             SystemLog::store($request);
@@ -52,10 +54,5 @@ class SMS extends Model
         $model->content = $message;
         $model->status = $status;
         $model->save();
-    }
-
-    public static function saveFeedback($payload){
-
-      Log::info("Payload: ".$payload);
     }
 }

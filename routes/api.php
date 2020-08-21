@@ -17,10 +17,13 @@ Route::post('/', 'MasterController@index');
 Route::get('/sync_users', 'MasterController@sync');
 Route::get('/retrieve_patients', 'MasterController@syncPatients');
 
-//Route::post('/sendSms', 'SMSController@index');
+Route::post('/sendSms', 'SMSController@index');
 Route::post('/receiveSms', 'SMSController@index');
 
 Route::post('/login', 'UserController@login');
 Route::post('/registration', 'UserController@registration');
 Route::post('/reset_pin', 'UserController@resetPin');
+Route::post('/dependents', 'UserController@dependents');
+
 Route::post('/feedback', 'FeedbackController@index');
+Route::post('/send_feedback', 'FeedbackController@send');

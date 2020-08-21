@@ -88,4 +88,21 @@ class UserController extends Controller
 
         return User::response($response->status, $response->message, $response->data);
     }
+
+
+    /**
+     * Get Dependents.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function dependents(Request $request)
+    {
+        $rules = [
+          'phonenumber' => 'regex:/^(\+254)[0-9]{9}$/'
+        ];
+
+        $response = User::dependents($request, $rules);
+
+        return User::response($response->status, $response->message, $response->data);
+    }
 }

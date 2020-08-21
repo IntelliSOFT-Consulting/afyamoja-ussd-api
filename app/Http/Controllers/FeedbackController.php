@@ -10,7 +10,10 @@ class FeedbackController extends Controller
 {
     //
     public static function index(){
-      Log::info("point 1".json_encode($_POST));
       Feedback::patientFeedback();
+    }
+
+    public static function send(){
+      Feedback::sendFeedback();
     }
 }

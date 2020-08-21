@@ -20,23 +20,23 @@ class User extends Model
  */
     protected $hidden = ['id','status','pin','terms_conditions_sent','isSynced','updated_at','created_at','terms_conditions'];
 
-    public static function addPatient($patient,$phonenumber,$id_number,$pin){
+    public static function addPatient($patient, $phonenumber, $id_number, $pin)
+    {
+        $addPatient =  new User;
+        $addPatient->phonenumber = $phonenumber;
+        $addPatient->id_number = $id_number;
+        $addPatient->first_name = $patient->first_name;
+        $addPatient->last_name = $patient->last_name;
+        $addPatient->dob = date('dmY', strtotime($patient->date_of_birth));
+        $addPatient->gender = $patient->gender;
+        $addPatient->pin = Hash::make($pin);
+        $addPatient->terms_conditions_sent = 1;
+        $addPatient->terms_conditions = 1;
+        $addPatient->status = 1;
+        $addPatient->isSynced = 1;
+        $addPatient->save();
 
-      $addPatient =  new User;
-      $addPatient->phonenumber = $phonenumber;
-      $addPatient->id_number = $id_number;
-      $addPatient->first_name = $patient->first_name;
-      $addPatient->last_name = $patient->last_name;
-      $addPatient->dob = date('dmY', strtotime($patient->date_of_birth));
-      $addPatient->gender = $patient->gender;
-      $addPatient->pin = Hash::make($pin);
-      $addPatient->terms_conditions_sent = 1;
-      $addPatient->terms_conditions = 1;
-      $addPatient->status = 1;
-      $addPatient->isSynced = 1;
-      $addPatient->save();
-
-      return $addPatient;
+        return $addPatient;
     }
 
     public static function login($request)
@@ -125,23 +125,50 @@ class User extends Model
         $status= "Failure";
         $message = "Sorry, unable to reset pin";
 
-        $bearerToken = User::getBearerToken($request, $rules);
-        if ($bearerToken->status == "Success") {
+        $user = User::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
             $master = new MasterController();
-            $forgotPin = $master->request('forgot_pin', $bearerToken->response, Token::token());
+            $forgotPin = $master->request('forgot_pin', $user->response, Token::token());
             if ($forgotPin) {
-                $user = User::where('phonenumber', $bearerToken->response->phonenumber)->update(['pin' => Hash::make($forgotPin->data->pin)]);
+                $user = User::where('phonenumber', $user->response->phonenumber)->update(['pin' => Hash::make($forgotPin->data->pin)]);
                 if ($user) {
-                    SMS::sendSMS($bearerToken->response->phonenumber, $bearerToken->response->first_name.", we have reset your PIN to ".$forgotPin->data->pin);
+                    SMS::sendSMS('normal', $user->response->phonenumber, $user->response->first_name.", we have reset your PIN to ".$forgotPin->data->pin);
                     $status = "Success";
                     $message = "Your pin has been reset, you should receive an SMS shortly";
                 }
             }
         } else {
-            $message = $bearerToken->response;
+            $message = $user->response;
         }
 
         return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
+    }
+
+    /**
+    *Get Dependents
+    **/
+    public static function dependents($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, unable to retrieve your dependents";
+        $data = [];
+
+        $user = User::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $dependents = $master->dependents($user->response, Token::token());
+            if ($dependents) {
+                $status = "Success";
+                $message = "Your pin has been reset, you should receive an SMS shortly";
+                $data = $dependents;
+            } else {
+                $message = "You currently have no dependents";
+            }
+        } else {
+            $message = $user->response;
+        }
+
+        return (object) ['status'=> $status,'message'=>$message,'data'=>$data ];
     }
 
 

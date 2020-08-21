@@ -4,13 +4,14 @@ namespace App;
 
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 
 class Token extends Model
 {
     public static function token()
     {
-        $all_tokens = Token::where('created_at', '>', DB::raw('NOW() - INTERVAL 5 MINUTE'))->latest()->first();
+        $all_tokens = Token::where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->latest()->first();
         return $all_tokens ?  $all_tokens->access_token : self::generateToken();
     }
 
