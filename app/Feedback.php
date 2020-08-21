@@ -24,12 +24,16 @@ class Feedback extends Model
 
     public static function sendFeedback()
     {
-        Feedback::where('sms_sent', 0)->chunkById(5, function ($userFeedbacks) {
+        Feedback::where('sms_sent', 0)->where('feedback_type_id', 1)->chunkById(5, function ($userFeedbacks) {
             foreach ($userFeedbacks as $userFeedback) {
-                $feedbackType = FeedbackType::where('id', $userFeedback->feedback_type_id)->first();
-                $sendSMS = SMS::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
-                if ($sendSMS['status'] == "success") {
-                    Feedback::where('id', $userFeedback->id)->update(['sms_sent' => 1]);
+                $created_at = new \DateTime($userFeedback->created_at);
+                $session_idle = $created_at->diff(new \DateTime());
+                if ($session_idle > 10) {
+                    $feedbackType = FeedbackType::where('id', $userFeedback->feedback_type_id)->first();
+                    $sendSMS = SMS::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
+                    if ($sendSMS['status'] == "success") {
+                        Feedback::where('id', $userFeedback->id)->update(['sms_sent' => 1]);
+                    }
                 }
             }
         });
