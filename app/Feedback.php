@@ -45,7 +45,7 @@ class Feedback extends Model
             $feedback = Feedback::where('phonenumber', $_POST['from'])->where('sms_sent', 1)->whereNull('response')->first();
 
             if ($feedback) {
-                if ($feedback->feedback_type_id == 2) {
+                if ($feedback->feedback_type_id == 4) {
                     $choice = (int)$_POST['text'];
                     $message;
                     switch ($choice) {
@@ -82,15 +82,17 @@ class Feedback extends Model
         $sentFeedback = Feedback::where('phonenumber', $_POST['from'])->pluck('feedback_type_id')->toArray();
         $feedbackType = FeedbackType::where('status', 1)->whereNotIn('id', $sentFeedback)->first();
 
-        $AddFeedback = new Feedback;
-        $AddFeedback->phonenumber = $_POST['from'];
-        $AddFeedback->feedback_type_id = $feedbackType->id;
-        $AddFeedback->save();
+        if ($feedbackType) {
+            $AddFeedback = new Feedback;
+            $AddFeedback->phonenumber = $_POST['from'];
+            $AddFeedback->feedback_type_id = $feedbackType->id;
+            $AddFeedback->save();
 
-        if ($AddFeedback) {
-            $sendSMS = SMS::sendSMS('feedback', $_POST['from'], $feedbackType->feedback);
-            if ($sendSMS['status'] == "success") {
-                Feedback::where('id', $AddFeedback->id)->update(['sms_sent' => 1]);
+            if ($AddFeedback) {
+                $sendSMS = SMS::sendSMS('feedback', $_POST['from'], $feedbackType->feedback);
+                if ($sendSMS['status'] == "success") {
+                    Feedback::where('id', $AddFeedback->id)->update(['sms_sent' => 1]);
+                }
             }
         }
     }
