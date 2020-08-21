@@ -771,8 +771,6 @@ class MasterController extends Controller
     {
         $token = Token::token();
 
-        Log::info("tok 1".$token);
-
         $url = env("url");
         $url = $url.$path;
 

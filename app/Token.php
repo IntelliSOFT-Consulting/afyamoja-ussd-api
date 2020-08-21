@@ -11,8 +11,9 @@ class Token extends Model
 {
     public static function token()
     {
-        $all_tokens = Token::where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->latest()->first();
-        return $all_tokens ?  $all_tokens->access_token : self::generateToken();
+        $token = Token::where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->first();
+        Log::info("token ".$token);
+        return $token ?  $token->access_token : self::generateToken();
     }
 
     public static function generateToken()
