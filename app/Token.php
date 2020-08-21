@@ -11,9 +11,12 @@ class Token extends Model
 {
     public static function token()
     {
-        $token = Token::where('created_at', '>', DB::raw('NOW() - INTERVAL 30 MINUTE'))->first();
-        Log::info("token ".$token);
-        return $token ?  $token->access_token : self::generateToken();
+        $token = Token::latest()->first();
+
+        $last_updated = new \DateTime($token->created_at);
+        $session_idle = $last_updated->diff(new \DateTime());
+
+        return $session_idle->i < 30 ?  $token->access_token : self::generateToken();
     }
 
     public static function generateToken()
