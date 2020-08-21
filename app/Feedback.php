@@ -28,7 +28,7 @@ class Feedback extends Model
             foreach ($userFeedbacks as $userFeedback) {
                 $created_at = new \DateTime($userFeedback->created_at);
                 $session_idle = $created_at->diff(new \DateTime());
-                if ($session_idle > 10) {
+                if ($session_idle->i > 10) {
                     $feedbackType = FeedbackType::where('id', $userFeedback->feedback_type_id)->first();
                     $sendSMS = SMS::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
                     if ($sendSMS['status'] == "success") {
