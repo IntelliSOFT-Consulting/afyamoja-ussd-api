@@ -30,7 +30,7 @@ class MasterController extends Controller
         $textContent = (explode("*", $_POST['text']));
         $text = trim($textContent[(count($textContent) - 1)]);
 
-        $userData = User::where('phonenumber', '=', $phonenumber)->first();
+        $userData = User::where('phonenumber', $phonenumber)->first();
         $userSession = DB::table('sessions')->where('sessionId', '=', $sessionId)->latest()->first();
 
         if (is_null($userSession)) {
@@ -130,7 +130,7 @@ class MasterController extends Controller
                 case $level == 5  && $userData->terms_conditions == 1:
                     if (Hash::check($text, $userData->pin)) {
                         self::level(6, 1);
-                        if ($userData->feedback == 0) {
+                        if ($userData->feedback_sent == 0) {
                             Feedback::addFeedback($userData);
                         }
                         return self::menuItem($level, 1);

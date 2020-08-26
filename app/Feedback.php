@@ -24,20 +24,20 @@ class Feedback extends Model
 
     public static function sendFeedback()
     {
-        $userFeedbacks = Feedback::where('sms_sent', 0)->where('feedback_type_id', 1)->limit(5);->get();
-
-        foreach ($userFeedbacks as $userFeedback) {
-            $created_at = new \DateTime($userFeedback->created_at);
-            $session_idle = $created_at->diff(new \DateTime());
-
-            if ($session_idle->i > 10) {
-              Log::info(json_encode($userFeedback).' => '.$session_idle->i);
-                $feedbackType = FeedbackType::where('id', $userFeedback->feedback_type_id)->first();
-                $sendSMS = SMS::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
-
-                Feedback::where('id', $userFeedback->id)->update(['sms_sent' => 1]);
+        Feedback::where('sms_sent', 0)->where('feedback_type_id', 1)->chunkById(5, function ($userFeedbacks) {
+            foreach ($userFeedbacks as $userFeedback) {
+                $created_at = new \DateTime($userFeedback->created_at);
+                $session_idle = $created_at->diff(new \DateTime());
+                Log::info($session_idle->i);
+                if ($session_idle->i > 10) {
+                    $feedbackType = FeedbackType::where('id', $userFeedback->feedback_type_id)->first();
+                    $sendSMS = SMS::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
+                    if ($sendSMS['status'] == "success") {
+                        Feedback::where('id', $userFeedback->id)->update(['sms_sent' => 1]);
+                    }
+                }
             }
-        }
+        });
     }
 
     public static function patientFeedback()
