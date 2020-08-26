@@ -32,9 +32,8 @@ class Feedback extends Model
                 if ($session_idle->i > 10) {
                     $feedbackType = FeedbackType::where('id', $userFeedback->feedback_type_id)->first();
                     $sendSMS = SMS::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
-                    if ($sendSMS['status'] == "success") {
-                        Feedback::where('id', $userFeedback->id)->update(['sms_sent' => 1]);
-                    }
+                    
+                    Feedback::where('id', $userFeedback->id)->update(['sms_sent' => 1]);
                 }
             }
         });

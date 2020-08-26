@@ -339,7 +339,7 @@ class MasterController extends Controller
                     if (Hash::check($text, $userData->pin) && is_numeric($text) && strlen($text) == 4) {
                         $request = self::request('forget_patient', $userData, $userSession->access_token);
                         if ($request) {
-                            User::where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0, 'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
+                            User::where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0, 'feedback_sent' => 0 ,'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
                             Sms::sendSMS('normal', $_POST['phoneNumber'], self::smsItem('forget'));
                             return self::menuItem($level, 0);
                         }
