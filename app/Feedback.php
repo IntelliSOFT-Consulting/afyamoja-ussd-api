@@ -28,7 +28,7 @@ class Feedback extends Model
             foreach ($userFeedbacks as $userFeedback) {
                 $created_at = new \DateTime($userFeedback->created_at);
                 $session_idle = $created_at->diff(new \DateTime());
-                Log::info($session_idle->i);
+
                 if ($session_idle->i > 10) {
                     $feedbackType = FeedbackType::where('id', $userFeedback->feedback_type_id)->first();
                     $sendSMS = SMS::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
@@ -42,6 +42,7 @@ class Feedback extends Model
 
     public static function patientFeedback()
     {
+        Log::info($_POST);
         if (isset($_POST['from'])) {
             $feedback = Feedback::where('phonenumber', $_POST['from'])->where('sms_sent', 1)->whereNull('response')->first();
 
