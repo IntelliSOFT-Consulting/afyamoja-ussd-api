@@ -338,8 +338,9 @@ class MasterController extends Controller
                 case $level == 88:
                     if (Hash::check($text, $userData->pin) && is_numeric($text) && strlen($text) == 4) {
                         $request = self::request('forget_patient', $userData, $userSession->access_token);
+                        User::where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0, 'feedback_sent' => 0 ,'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
+
                         if ($request) {
-                            User::where('phonenumber', $_POST['phoneNumber'])->update(['status' => 0, 'feedback_sent' => 0 ,'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
                             Sms::sendSMS('normal', $_POST['phoneNumber'], self::smsItem('forget'));
                             return self::menuItem($level, 0);
                         }
@@ -842,6 +843,11 @@ class MasterController extends Controller
         } else {
             User::where('phonenumber', $user->phonenumber)->update(['terms_conditions' => 1, 'status' => 1]);
         }
+    }
+
+    public function deletePatient(){
+      $token = Token::token();
+      
     }
 
     public function syncPatients()
