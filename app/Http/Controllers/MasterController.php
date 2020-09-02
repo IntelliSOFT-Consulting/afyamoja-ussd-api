@@ -849,11 +849,7 @@ class MasterController extends Controller
 
     public function deletePatient(){
       $token = Token::token();
-<<<<<<< HEAD
 
-=======
-      
->>>>>>> ef69308e9438fc4c9eed3fa4f626141553a3b8dc
     }
 
     public function syncPatients()
