@@ -13,10 +13,14 @@ class Token extends Model
     {
         $token = Token::latest()->first();
 
-        $last_updated = new \DateTime($token->created_at);
-        $session_idle = $last_updated->diff(new \DateTime());
+        if ($token) {
+            $last_updated = new \DateTime($token->created_at);
+            $session_idle = $last_updated->diff(new \DateTime());
 
-        return $session_idle->i < 30 ?  $token->access_token : self::generateToken();
+            return $session_idle->i < 30 ?  $token->access_token : self::generateToken();
+        }
+
+        return self::generateToken();
     }
 
     public static function generateToken()

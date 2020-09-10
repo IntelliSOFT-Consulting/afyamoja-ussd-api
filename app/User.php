@@ -171,7 +171,6 @@ class User extends Model
         return (object) ['status'=> $status,'message'=>$message,'data'=>$data ];
     }
 
-
     /**
     *Get header Authorization
     **/

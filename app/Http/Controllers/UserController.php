@@ -19,7 +19,7 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $rules = [
-          'phone_number' => 'regex:/^(\+254)[0-9]{9}$/',
+          'phone_number' => 'required|regex:/^(\+254)[0-9]{9}$/',
           'pin' => 'required|digits_between:3,5',
         ];
         $status = "Failure";
@@ -81,7 +81,7 @@ class UserController extends Controller
     {
         $rules = [
           'id_number' =>  'required',
-          'phonenumber' => 'regex:/^(\+254)[0-9]{9}$/'
+          'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/'
         ];
 
         $response = User::resetPin($request, $rules);
