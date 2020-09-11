@@ -793,6 +793,10 @@ class MasterController extends Controller
         $curl_response = curl_exec($curl);
         $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
+        if(curl_errno($curl)){
+            Log::info($path.curl_error($curl));
+        }
+
         $request = new Request();
         $request->replace([
           'url' => $path,
