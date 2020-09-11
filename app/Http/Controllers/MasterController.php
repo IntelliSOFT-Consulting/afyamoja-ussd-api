@@ -788,8 +788,8 @@ class MasterController extends Controller
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 600);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 600);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 60L);
         $curl_response = curl_exec($curl);
         $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
