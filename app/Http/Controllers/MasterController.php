@@ -800,7 +800,7 @@ class MasterController extends Controller
 
         $request = new Request();
         $request->replace([
-          'url' => $path,
+          'url' => $url,
           'http_code' => $httpcode,
           'payload' => $curl_post_data ,
           'response' => $curl_response ,
