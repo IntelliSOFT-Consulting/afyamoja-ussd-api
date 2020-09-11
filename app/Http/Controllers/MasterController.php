@@ -343,8 +343,8 @@ class MasterController extends Controller
                         if ($request) {
                             Sms::sendSMS('normal', $_POST['phoneNumber'], self::smsItem('forget'));
                             return self::menuItem($level, 0);
-                        }else{
-                          return self::menuItem($level, 2);
+                        } else {
+                            return self::menuItem($level, 2);
                         }
                     }
                     return self::menuItem($level, 1);
@@ -770,6 +770,7 @@ class MasterController extends Controller
     }
 
 
+
     public function generalAPI($curl_post_data, $path)
     {
         $token = Token::token();
@@ -788,13 +789,13 @@ class MasterController extends Controller
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
-        curl_setopt($curl, CURLOPT_TIMEOUT,600);
+        //curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
+        //curl_setopt($curl, CURLOPT_TIMEOUT, 600);
         $curl_response = curl_exec($curl);
         $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        if(curl_errno($curl)){
-            //Log::info($path.curl_error($curl));
+        if (curl_errno($curl)) {
+            Log::info($path.curl_error($curl));
         }
 
         $request = new Request();
@@ -852,9 +853,9 @@ class MasterController extends Controller
         }
     }
 
-    public function deletePatient(){
-      $token = Token::token();
-
+    public function deletePatient()
+    {
+        $token = Token::token();
     }
 
     public function syncPatients()
