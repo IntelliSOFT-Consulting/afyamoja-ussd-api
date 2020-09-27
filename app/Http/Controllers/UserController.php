@@ -19,7 +19,7 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $rules = [
-          'phone_number' => 'required|regex:/^(\+254)[0-9]{9}$/',
+          'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/',
           'pin' => 'required|digits_between:3,5',
         ];
         $status = "Failure";
@@ -102,6 +102,27 @@ class UserController extends Controller
         ];
 
         $response = User::dependents($request, $rules);
+
+        return User::response($response->status, $response->message, $response->data);
+    }
+
+
+    /**
+     * Add dependent
+     *
+     */
+    public function addDependent(Request $request)
+    {
+        $rules = [
+          'first_name' =>  'required',
+          'last_name' =>  'required',
+          'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/',
+          'gender' => 'required|in:male,female',
+          'relationship' => 'required|in:spouse,child',
+          'dob' =>  'required|date_format:Y-m-d',
+        ];
+
+        $response = User::addDependent($request, $rules);
 
         return User::response($response->status, $response->message, $response->data);
     }

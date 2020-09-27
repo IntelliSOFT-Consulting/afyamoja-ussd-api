@@ -25,5 +25,10 @@ Route::post('/login', 'UserController@login');
 Route::post('/registration', 'UserController@registration');
 Route::post('/reset_pin', 'UserController@resetPin');
 Route::post('/dependents', 'UserController@dependents');
+Route::post('/add_dependent', 'UserController@addDependent');
+
+Route::post('/last_visit', 'PatientController@lastVisit');
+Route::post('/full_history', 'PatientController@fullHistory');
+Route::post('/patient_profile', 'PatientController@patientProfile');
 
 Route::post('/feedback', 'FeedbackController@index');

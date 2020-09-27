@@ -125,17 +125,145 @@ class User extends Model
         $status= "Failure";
         $message = "Sorry, unable to reset pin";
 
-        $user = User::getBearerToken($request, $rules);
-        if ($user->status == "Success") {
+        $user = User::where('phonenumber', $request['phonenumber'])->where('status', 1)->first();
+
+        if ($user) {
             $master = new MasterController();
-            $forgotPin = $master->request('forgot_pin', $user->response, Token::token());
+            $forgotPin = $master->request('forgot_pin', $user, Token::token());
             if ($forgotPin) {
-                $user = User::where('phonenumber', $user->response->phonenumber)->update(['pin' => Hash::make($forgotPin->data->pin)]);
+                $phonenumber = $user->phonenumber;
+                $first_name =  $user->first_name;
+                $pin = $forgotPin->data->pin;
+                $user = User::where('id', $user->id)->update(['pin' => Hash::make($forgotPin->data->pin)]);
                 if ($user) {
-                    SMS::sendSMS('normal', $user->response->phonenumber, $user->response->first_name.", we have reset your PIN to ".$forgotPin->data->pin);
+                    SMS::sendSMS('normal', $phonenumber, $first_name.", we have reset your PIN to ".$pin);
                     $status = "Success";
                     $message = "Your pin has been reset, you should receive an SMS shortly";
                 }
+            }
+        }
+
+
+        return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
+    }
+
+    /**
+    *Patient Profile
+    **/
+    public static function patientProfile($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, unable to retrieve your profile";
+        $data = [];
+
+        $user = User::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $profile = $master->request('patient_profile', $user->response, Token::token());
+            if ($profile) {
+                $status = "Success";
+                $message = "Patient profile";
+                $data = $profile->data->patient_profile;
+            }
+        } else {
+            $message = $user->response;
+        }
+
+        return (object) ['status'=> $status,'message'=>$message,'data'=>$data ];
+    }
+
+    /**
+    *Get Last Visit
+    **/
+    public static function lastVisit($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, unable to retrieve your last visits";
+        $data = array();
+
+        $user = User::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $last_visit = $master->request('last_visit', $user->response, Token::token());
+            if ($last_visit) {
+                $status = "Success";
+                $message = "Patient's last visit";
+                foreach ($last_visit->data->visitSummary->AllergyIntolerance as $visit) {
+                    $data[] =[
+                      'criticality'=> $visit->criticality,
+                      'type'=>$visit->type,
+                      'allergy'=>$visit->code->text,
+                      'date'=>$visit->recordedDate,
+                      'doctor'=> $visit->asserter->display
+                    ]
+                    ;
+                }
+            } else {
+                $message = "You currently have no last visit";
+            }
+        } else {
+            $message = $user->response;
+        }
+
+        return (object) ['status'=> $status,'message'=>$message,'data'=>$data ];
+    }
+
+
+    /**
+    *Get Full History
+    **/
+    public static function fullHistory($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, unable to retrieve your full history";
+        $data = array();
+
+        $user = User::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $history = $master->request('full_medical_history', $user->response, Token::token());
+            if ($history) {
+                $status = "Success";
+                $message = "Patient's Full History";
+                foreach ($history->data->fullHistory->fullHistory[0]->AllergyIntolerance as $visit) {
+                    $data []= [
+                      'criticality'=> $visit->criticality,
+                      'type'=>$visit->type,
+                      'allergy'=>$visit->code->text,
+                      'date'=>$visit->recordedDate,
+                      'doctor'=>$visit->asserter->display
+                    ];
+                }
+            } else {
+                $message = "You currently have no history";
+            }
+        } else {
+            $message = $user->response;
+        }
+
+        return (object) ['status'=> $status,'message'=>$message,'data'=>$data ];
+    }
+
+
+    /**
+    *Add Dependents
+    **/
+    public static function addDependent($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, unable to add your dependents";
+
+        $kin = json_decode(json_encode($request->json()->all()));
+
+        $user = User::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $addDependent = $master->addKin($kin, $user->response, Token::token());
+            if ($addDependent) {
+                $status = "Success";
+                $message = "Your dependent has been successfully added";
+            } else {
+                $message = "We are currently not able to add dependent";
             }
         } else {
             $message = $user->response;
@@ -151,7 +279,7 @@ class User extends Model
     {
         $status= "Failure";
         $message = "Sorry, unable to retrieve your dependents";
-        $data = [];
+        $data = array();
 
         $user = User::getBearerToken($request, $rules);
         if ($user->status == "Success") {
@@ -159,7 +287,7 @@ class User extends Model
             $dependents = $master->dependents($user->response, Token::token());
             if ($dependents) {
                 $status = "Success";
-                $message = "Your pin has been reset, you should receive an SMS shortly";
+                $message = "Dependents successfully retrieved.";
                 $data = $dependents;
             } else {
                 $message = "You currently have no dependents";
