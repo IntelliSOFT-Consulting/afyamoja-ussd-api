@@ -188,16 +188,7 @@ class User extends Model
             if ($last_visit) {
                 $status = "Success";
                 $message = "Patient's last visit";
-                foreach ($last_visit->data->visitSummary->AllergyIntolerance as $visit) {
-                    $data[] =[
-                      'criticality'=> $visit->criticality,
-                      'type'=>$visit->type,
-                      'allergy'=>$visit->code->text,
-                      'date'=>$visit->recordedDate,
-                      'doctor'=> $visit->asserter->display
-                    ]
-                    ;
-                }
+                $data = self::patientData($last_visit->data->visitSummary);
             } else {
                 $message = "You currently have no last visit";
             }
@@ -225,15 +216,7 @@ class User extends Model
             if ($history) {
                 $status = "Success";
                 $message = "Patient's Full History";
-                foreach ($history->data->fullHistory->fullHistory[0]->AllergyIntolerance as $visit) {
-                    $data []= [
-                      'criticality'=> $visit->criticality,
-                      'type'=>$visit->type,
-                      'allergy'=>$visit->code->text,
-                      'date'=>$visit->recordedDate,
-                      'doctor'=>$visit->asserter->display
-                    ];
-                }
+                $data = self::patientData($history->data->fullHistory->fullHistory[0]);
             } else {
                 $message = "You currently have no history";
             }
@@ -242,6 +225,59 @@ class User extends Model
         }
 
         return (object) ['status'=> $status,'message'=>$message,'data'=>$data ];
+    }
+
+
+    public static function patientData($patientData)
+    {
+        $data = array();
+
+        foreach ($patientData->AllergyIntolerance as $visit) {
+            $data['allergies'][] =[
+            'criticality'=> $visit->criticality,
+            'type'=>$visit->type,
+            'allergy'=>$visit->code->text,
+            'date'=>$visit->recordedDate,
+            'doctor'=>$visit->asserter->display
+          ];
+        }
+        foreach ($patientData->Composition as $visit) {
+            $data['consultant-note'][] =[
+            'title'=>$visit->title,
+            'date'=>$visit->date,
+            'tests'=>$visit->section,
+            'doctor'=> $visit->author[0]->display
+          ];
+        }
+        foreach ($patientData->Condition as $visit) {
+            $data['condition'][] =[
+            'condition'=>$visit->code->text,
+            'date'=>$visit->recordedDate,
+            'verificationStatus'=>$visit->verificationStatus->text,
+            'doctor'=> $visit->recorder->display
+          ];
+        }
+        foreach ($patientData->MedicationRequest as $visit) {
+            $data['medication'][] =[
+            'medicine'=> $visit->medicationCodeableConcept->text,
+            'condition'=>$visit->supportingInformation[0]->display,
+            'date'=>$visit->authoredOn,
+            'dosageInstruction'=>$visit->dosageInstruction[0]->text,
+            'note'=>$visit->note[0]->text,
+            'doctor'=> $visit->requester->display
+          ];
+        }
+        foreach ($patientData->Observation as $visit) {
+            $data['observation'][] =[
+            'observation'=> $visit->category[0]->text,
+            'condition'=>$visit->code->text,
+            'interpretation'=>$visit->interpretation[0]->text,
+            'date'=>$visit->issued,
+            'valueQuantity'=>$visit->valueQuantity->value,
+          ];
+        }
+
+        return $data;
     }
 
 
@@ -268,7 +304,6 @@ class User extends Model
         } else {
             $message = $user->response;
         }
-
         return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
     }
 
@@ -295,7 +330,6 @@ class User extends Model
         } else {
             $message = $user->response;
         }
-
         return (object) ['status'=> $status,'message'=>$message,'data'=>$data ];
     }
 
