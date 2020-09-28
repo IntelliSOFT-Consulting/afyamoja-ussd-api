@@ -17,7 +17,7 @@ class Token extends Model
             $last_updated = new \DateTime($token->created_at);
             $session_idle = $last_updated->diff(new \DateTime());
 
-            return $session_idle->i < 30 ?  $token->access_token : self::generateToken();
+            return $session_idle->d < 1 && $session_idle->h < 1 && $session_idle->i < 30 ?  $token->access_token : self::generateToken();
         }
 
         return self::generateToken();
