@@ -188,7 +188,7 @@ class User extends Model
             if ($last_visit) {
                 $status = "Success";
                 $message = "Patient's last visit";
-                if (in_array('visitSummary', $last_visit)) {
+                if (property_exists($last_visit,'visitSummary')) {
                     $data = $last_visit->data->visitSummary;
                 }
             } else {
@@ -218,7 +218,7 @@ class User extends Model
             if ($history) {
                 $status = "Success";
                 $message = "Patient's Full History";
-                if (in_array('fullHistory', $history)) {
+                if (property_exists($history,'fullHistory')) {
                     $data = $history->data->fullHistory->fullHistory[0];
                 }
             } else {
