@@ -163,7 +163,7 @@ class User extends Model
             if ($profile) {
                 $status = "Success";
                 $message = "Patient profile";
-                if (property_exists($profile, 'patient_profile')) {
+                if (isset($profile->data->patient_profile)) {
                     $data = $profile->data->patient_profile;
                 }
             }
@@ -190,7 +190,7 @@ class User extends Model
             if ($last_visit) {
                 $status = "Success";
                 $message = "Patient's last visit";
-                if (property_exists($last_visit, 'visitSummary')) {
+                if (isset($last_visit->data->visitSummary)) {
                     $data = $last_visit->data->visitSummary;
                 }
             } else {
@@ -220,7 +220,7 @@ class User extends Model
             if ($history) {
                 $status = "Success";
                 $message = "Patient's Full History";
-                if (property_exists($history, 'fullHistory')) {
+                if (isset($history->data->fullHistory)) {
                     $data = $history->data->fullHistory->fullHistory[0];
                 }
             } else {
