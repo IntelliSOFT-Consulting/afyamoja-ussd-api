@@ -807,7 +807,7 @@ class MasterController extends Controller
           'system' => 'SIL' ]);
         SystemLog::store($request);
 
-        if ($httpcode != 500 && $httpcode != 401) {
+        if ($httpcode != 500 && $httpcode != 401 && $httpcode != 404) {
             return $curl_response;
         } else {
             return null;
