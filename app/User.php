@@ -188,7 +188,7 @@ class User extends Model
             if ($last_visit) {
                 $status = "Success";
                 $message = "Patient's last visit";
-                $data = $last_visit->data->visitSummary;
+                $data = $last_visit->data->visitSummary ? $last_visit->data->visitSummary : [];
             } else {
                 $message = "You currently have no last visit";
             }
@@ -216,7 +216,7 @@ class User extends Model
             if ($history) {
                 $status = "Success";
                 $message = "Patient's Full History";
-                $data = $history->data->fullHistory->fullHistory[0];
+                $data = $history->data->fullHistory->fullHistory ? $history->data->fullHistory->fullHistory[0] : [];
             } else {
                 $message = "You currently have no history";
             }
