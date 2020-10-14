@@ -115,12 +115,21 @@ class MasterController extends Controller
                     return self::menuItem($level, 7);
                     break;
                 case $level == 5 && $userData->terms_conditions == 0 && $text == 1:
+                    self::level(51, $text);
                     self::processRegistration($userData);
-                    return self::menuItem($level, 4);
+                    return self::menuItem($level, 8);
                     break;
                 case $level == 5 && $userData->terms_conditions == 0 && $text != 1:
                     User::where('phonenumber', $_POST['phoneNumber'])->update(['terms_conditions_sent' => 0]);
                     return self::menuItem(5, 5);
+                    break;
+                case $level == 51:
+                    if ($text == 1) {
+                        User::where('phonenumber', $_POST['phoneNumber'])->update(['feedback_consent' => 1]);
+                    } else {
+                        User::where('phonenumber', $_POST['phoneNumber'])->update(['feedback_consent' => 2, 'feedback_sent' => 2]);
+                    }
+                    return self::menuItem(5, 4);
                     break;
                 case $level == 5 && $userData->terms_conditions == 1 && $text == 999:
                     self::forgotPassword(1);
