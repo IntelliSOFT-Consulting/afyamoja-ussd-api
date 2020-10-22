@@ -898,17 +898,21 @@ class MasterController extends Controller
                 }
                 $pin = mt_rand(1000, 9999);
 
-                $addPatient = User::addPatient($patient, $phonenumber, $id_number, $pin);
+                $userData = User::where('phonenumber', $phonenumber)->first();
 
-                if ($addPatient) {
-                    $objectPatient = (object) ['msisdn'=> [$phonenumber],'id_number'=> $id_number,'passport_number'=> ''];
-                    $curl_post_data = array('patient'=> $objectPatient, 'sync_status' => 1,'pin' =>$pin);
-                    $data_string = json_encode($curl_post_data);
-                    $response = self::generalAPI($data_string, 'patients/sync_patient/');
+                if (!$userData) {
+                    $addPatient = User::addPatient($patient, $phonenumber, $id_number, $pin);
 
-                    $placeHolders = ['_name', '_pin'];
-                    $content = [$patient->first_name.' '.$patient->last_name,$pin];
-                    Sms::sendSMS('normal', $phonenumber, str_replace($placeHolders, $content, self::smsItem('reset_pin')));
+                    if ($addPatient) {
+                        $objectPatient = (object) ['msisdn'=> [$phonenumber],'id_number'=> $id_number,'passport_number'=> ''];
+                        $curl_post_data = array('patient'=> $objectPatient, 'sync_status' => 1,'pin' =>$pin);
+                        $data_string = json_encode($curl_post_data);
+                        $response = self::generalAPI($data_string, 'patients/sync_patient/');
+
+                        $placeHolders = ['_name', '_pin'];
+                        $content = [$patient->first_name.' '.$patient->last_name,$pin];
+                        Sms::sendSMS('normal', $phonenumber, str_replace($placeHolders, $content, self::smsItem('reset_pin')));
+                    }
                 }
             }
         }
