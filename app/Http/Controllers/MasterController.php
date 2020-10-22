@@ -857,6 +857,8 @@ class MasterController extends Controller
             $request = self::request('forgot_pin', $user, $token);
             if ($request) {
                 self::updatePatient($name, $request->data->pin, $user->phonenumber);
+            } else {
+                User::where('phonenumber', $user->phonenumber)->update(['isSynced' => 2]);
             }
         } elseif ($register) {
             self::updatePatient($name, $register->data->pin, $user->phonenumber);
