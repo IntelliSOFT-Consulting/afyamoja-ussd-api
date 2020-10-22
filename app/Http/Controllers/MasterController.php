@@ -632,8 +632,10 @@ class MasterController extends Controller
         $placeHolders = ['_name', '_pin'];
         $content = [$name,$pin];
 
-        User::where('phonenumber', $phonenumber)->update(['pin' => Hash::make($pin),'terms_conditions' => 1, 'status' => 1, 'isSynced' => 1]);
-        Sms::sendSMS('normal', $phonenumber, str_replace($placeHolders, $content, self::smsItem('registration')));
+        $update = User::where('phonenumber', $phonenumber)->update(['pin' => Hash::make($pin),'terms_conditions' => 1, 'status' => 1, 'isSynced' => 1]);
+        if ($update) {
+            Sms::sendSMS('normal', $phonenumber, str_replace($placeHolders, $content, self::smsItem('registration')));
+        }
     }
 
     public function addKin($userKin, $userData, $token)
@@ -831,15 +833,16 @@ class MasterController extends Controller
 
     public function sync()
     {
-        User::where('terms_conditions', 1)
+        $users = User::where('terms_conditions', 1)
             ->where('status', 1)
             ->where('isSynced', 0)
-            ->chunkById(10, function ($users) {
-                foreach ($users as $user) {
-                    self::processRegistration($user);
-                    $last_id = $user->id;
-                }
-            });
+            ->limit(10)
+            ->get();
+
+
+        foreach ($users as $user) {
+            self::processRegistration($user);
+        }
     }
 
     public function processRegistration($user)
