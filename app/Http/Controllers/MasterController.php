@@ -863,7 +863,7 @@ class MasterController extends Controller
         } elseif ($register) {
             self::updatePatient($name, $register->data->pin, $user->phonenumber);
         } else {
-            User::where('phonenumber', $user->phonenumber)->update(['terms_conditions' => 1, 'status' => 1]);
+            User::where('phonenumber', $user->phonenumber)->update(['terms_conditions' => 1, 'status' => 1,'isSynced' => 3]);
         }
     }
 
