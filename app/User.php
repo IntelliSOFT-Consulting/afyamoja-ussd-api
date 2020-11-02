@@ -221,7 +221,9 @@ class User extends Model
                 $status = "Success";
                 $message = "Patient's Full History";
                 if (isset($history->data->fullHistory)) {
-                    $data = $history->data->fullHistory->fullHistory[0];
+                    if (count($history->data->fullHistory->fullHistory) > 0) {
+                        $data = $history->data->fullHistory->fullHistory[0];
+                    }
                 }
             } else {
                 $message = "You currently have no history";
