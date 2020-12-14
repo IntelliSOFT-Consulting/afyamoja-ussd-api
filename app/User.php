@@ -288,6 +288,57 @@ class User extends Model
         return $data;
     }
 
+    /**
+    *Share Profile
+    **/
+    public static function shareProfile($request, $rules)
+    {
+        $status= "Failure";
+        $message = "We cannot find a provider with that code. Please check and try again";
+
+        $response = json_decode(json_encode($request->json()->all()));
+
+        $user = User::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $provider = $master->provider(Token::token(), $response->provider);
+
+            if ($provider) {
+                $share = $master->shareProfile($response, $user->response, $response->scope);
+                if ($share) {
+                    $status = "Success";
+                    $message = "You have successfully shared your profile.";
+                }
+            }
+        } else {
+            $message = $user->response;
+        }
+
+        return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
+    }
+
+    /**
+    *Forget Patient
+    **/
+    public static function forgetPatient($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Patient successfully forgotten";
+
+        $user = User::getBearerToken($request, $rules);
+
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $forget_patient = $master->request('forget_patient', $user->response, Token::token());
+            $status = "Success";
+            User::where('phonenumber', $user->response->phonenumber)->update(['status' => 0, 'feedback_sent' => 0 ,'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
+        } else {
+            $message = $user->response;
+        }
+
+        return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
+    }
+
 
     /**
     *Add Dependents
@@ -308,6 +359,32 @@ class User extends Model
                 $message = "Your dependent has been successfully added";
             } else {
                 $message = "We are currently not able to add dependent";
+            }
+        } else {
+            $message = $user->response;
+        }
+        return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
+    }
+
+    /**
+    *Delete Dependents
+    **/
+    public static function deleteDependent($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, unable to delete your dependent";
+
+        $kin = json_decode(json_encode($request->json()->all()));
+
+        $user = User::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $removeDependent = $master->removeKin($user->response, Token::token(), $kin->first_name." ".$kin->last_name);
+            if ($removeDependent) {
+                $status = "Success";
+                $message = "Your dependent has been successfully removed";
+            } else {
+                $message = "We are currently not able to remove your dependent";
             }
         } else {
             $message = $user->response;

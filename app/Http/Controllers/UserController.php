@@ -126,4 +126,20 @@ class UserController extends Controller
 
         return User::response($response->status, $response->message, $response->data);
     }
+
+    /**
+     * Delete dependent
+     *
+     */
+    public function deleteDependent(Request $request)
+    {
+        $rules = [
+          'first_name' =>  'required',
+          'last_name' =>  'required'
+        ];
+
+        $response = User::deleteDependent($request, $rules);
+
+        return User::response($response->status, $response->message, $response->data);
+    }
 }

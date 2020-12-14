@@ -232,15 +232,18 @@ class MasterController extends Controller
                     return self::menuItem(5, 5);
                     break;
                 case $level == 7 && is_numeric($text) && strlen($text) == 8 && $userSession->forgot_password == 1:
-                    self::forgotPassword(0);
-                    $request = self::request('forgot_pin', $userData, $userSession->access_token);
-                    if ($request) {
-                        $placeHolders = ['_name', '_pin'];
-                        $content = [$name,$request->data->pin];
-                        User::where('phonenumber', $_POST['phoneNumber'])->update(['pin' => Hash::make($request->data->pin)]);
-                        Sms::sendSMS('normal', $_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
-                        return str_replace("_name", $name, self::menuItem($level, 9990));
+                    if ($text == $userData->dob) {
+                        self::forgotPassword(0);
+                        $request = self::request('forgot_pin', $userData, $userSession->access_token);
+                        if ($request) {
+                            $placeHolders = ['_name', '_pin'];
+                            $content = [$name,$request->data->pin];
+                            User::where('phonenumber', $_POST['phoneNumber'])->update(['pin' => Hash::make($request->data->pin)]);
+                            Sms::sendSMS('normal', $_POST['phoneNumber'], str_replace($placeHolders, $content, self::smsItem('reset_pin')));
+                            return str_replace("_name", $name, self::menuItem($level, 9990));
+                        }
                     }
+                    return self::menuItem($level, 9991);
                     break;
                 case $level == 7 && $userSession->forgot_password == 1 && (!is_numeric($text) || strlen($text) != 8):
                     return self::menuItem($level, 9991);

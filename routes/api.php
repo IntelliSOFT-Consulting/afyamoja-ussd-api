@@ -26,9 +26,12 @@ Route::post('/registration', 'UserController@registration');
 Route::post('/reset_pin', 'UserController@resetPin');
 Route::post('/dependents', 'UserController@dependents');
 Route::post('/add_dependent', 'UserController@addDependent');
+Route::post('/delete_dependent', 'UserController@deleteDependent');
 
+Route::post('/share_records', 'PatientController@shareProfile');
 Route::post('/last_visit', 'PatientController@lastVisit');
 Route::post('/full_history', 'PatientController@fullHistory');
 Route::post('/patient_profile', 'PatientController@patientProfile');
+Route::post('/forget_patient', 'PatientController@forgetPatient');
 
 Route::post('/feedback', 'FeedbackController@index');
