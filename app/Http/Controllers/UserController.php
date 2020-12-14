@@ -50,7 +50,7 @@ class UserController extends Controller
         'first_name' =>  'required',
         'last_name' =>  'required',
         'id_number' => 'required',
-        'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/|unique:users',
+        'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/',
         'gender' => 'in:male,female',
         'dob' =>  'date_format:Y-m-d|before:-18 years',
     ];

@@ -74,7 +74,10 @@ class User extends Model
         $user = $request->json()->all();
         $data = [];
 
-        $userId = User::insertGetId([
+        $userData = User::where('phonenumber', $user['phonenumber'])->first();
+
+        if (!$userData) {
+            $userId = User::insertGetId([
                 'first_name' => $user['first_name'],
                 'last_name' => $user['last_name'],
                 'id_number' => $user['id_number'],
@@ -83,6 +86,9 @@ class User extends Model
                 'dob' => date('dmY', strtotime($user['dob']))  ,
                 'terms_conditions_sent' => 1,
             ]);
+        } else {
+            $userId = $userData->id;
+        }
 
         $new_user = (object) [
           'first_name' => $user['first_name'],
