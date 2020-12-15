@@ -169,7 +169,7 @@ class User extends Model
             $changePin = $master->resetPin($user, $response['current_pin'], Token::token(), $response['new_pin']);
             if ($changePin) {
                 $status = "Success";
-                $message = "Your pin has been changed, you should receive an SMS shortly";
+                $message = "Your pin has been changed successfully.";
                 User::where('phonenumber', $response['phonenumber'])->update(['pin' => Hash::make($response['new_pin'])]);
             }
         }
