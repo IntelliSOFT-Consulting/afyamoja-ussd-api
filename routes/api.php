@@ -24,6 +24,7 @@ Route::post('/receiveSms', 'SMSController@index');
 Route::post('/login', 'UserController@login');
 Route::post('/registration', 'UserController@registration');
 Route::post('/reset_pin', 'UserController@resetPin');
+Route::post('/change_pin', 'UserController@changePin');
 Route::post('/dependents', 'UserController@dependents');
 Route::post('/add_dependent', 'UserController@addDependent');
 Route::post('/delete_dependent', 'UserController@deleteDependent');

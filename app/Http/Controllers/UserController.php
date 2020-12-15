@@ -91,6 +91,26 @@ class UserController extends Controller
 
 
     /**
+     * Change Pin.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function changePin(Request $request)
+    {
+        $rules = [
+          'id_number' =>  'required',
+          'new_pin' =>  'required',
+          'current_pin' =>  'required',
+          'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/'
+        ];
+
+        $response = User::changePin($request, $rules);
+
+        return User::response($response->status, $response->message, $response->data);
+    }
+
+
+    /**
      * Get Dependents.
      *
      * @return \Illuminate\Http\Response

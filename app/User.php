@@ -153,6 +153,29 @@ class User extends Model
         return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
     }
 
+
+    /**
+    *Change User Pin
+    **/
+    public static function changePin($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, unable to change pin";
+        $response = $request->json()->all();
+        $user = User::where('phonenumber', $response['phonenumber'])->where('status', 1)->first();
+
+        if ($user && Hash::check($response['current_pin'], $user->pin)) {
+            $master = new MasterController();
+            $changePin = $master->resetPin($user, $response['current_pin'], Token::token(), $response['new_pin']);
+            if ($changePin) {
+                $status = "Success";
+                $message = "Your pin has been changed, you should receive an SMS shortly";
+                User::where('phonenumber', $response['phonenumber'])->update(['pin' => Hash::make($response['new_pin'])]);
+            }
+        }
+        return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
+    }
+
     /**
     *Patient Profile
     **/
