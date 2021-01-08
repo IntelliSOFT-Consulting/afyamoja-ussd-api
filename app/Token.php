@@ -62,7 +62,7 @@ class Token extends Model
 
         if ($curl_response) {
             $token = new Token;
-            $token->access_token = $curl_response->access_token;
+            $token->access_token = $curl_response ? $curl_response->access_token ? '';
             $token->save();
 
             return $token->access_token;
