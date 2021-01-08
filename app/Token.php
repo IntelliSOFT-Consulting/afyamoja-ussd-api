@@ -60,7 +60,7 @@ class Token extends Model
           'system' => 'SIL' ]);
         SystemLog::store($request);
 
-        if ($curl_response && $curl_response->access_token) {
+        if ($curl_response && $curl_response->access_token != null) {
             $token = new Token;
             $token->access_token = $curl_response->access_token ;
             $token->save();
