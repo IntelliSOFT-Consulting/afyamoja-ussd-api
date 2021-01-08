@@ -597,8 +597,10 @@ class MasterController extends Controller
     {
         $access_token = Token::token();
 
-        DB::insert('insert into sessions (sessionId,access_token,phonenumber,level,text,choice)
+        if ($access_token) {
+            DB::insert('insert into sessions (sessionId,access_token,phonenumber,level,text,choice)
                             values (?,?,?,?,?,?)', [$_POST['sessionId'],$access_token,$_POST['phoneNumber'],1,$_POST['text'],$choice]);
+        }
     }
 
     public function forgotPassword($status)
