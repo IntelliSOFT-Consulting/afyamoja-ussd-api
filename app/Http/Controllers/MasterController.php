@@ -51,10 +51,10 @@ class MasterController extends Controller
             $userSession = DB::table('sessions')->where('sessionId', '=', $sessionId)->latest()->first();
             $name = $userData->first_name." ".$userData->last_name;
             $age = (int)date("Y") - (int)substr($userData->dob, 4, 4);
-            $level = $userSession ? $userSession->level : 0 ;
+            $level = $userSession ? $userSession->level : 404 ;
 
             switch ($level) {
-                case $level == 0:
+                case $level == 404:
                   return self::menuItem(0, 2);
                   break;
                 case $level == 1 && $userData->terms_conditions_sent == 1 && $userData->terms_conditions == 1 && $userData->status == 0:
