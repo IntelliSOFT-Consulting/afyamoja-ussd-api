@@ -140,6 +140,7 @@ class UserController extends Controller
           'gender' => 'required|in:male,female',
           'relationship' => 'required|in:spouse,child',
           'dob' =>  'required|date_format:Y-m-d',
+          'msisdn' =>  'nullable|regex:/^(\+254)[0-9]{9}$/|required_if:relationship,=,spouse',
         ];
 
         $response = User::addDependent($request, $rules);
