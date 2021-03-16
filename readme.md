@@ -47,22 +47,15 @@ The Laravel framework is open-source software licensed under the [MIT license](h
 
 After installing on production run
 
-bash ```
-php artisan key:generate
-php artisan config:cache
-php artisan config:clear
-php artisan cache:clear
+    php artisan key:generate
+    php artisan config:cache
+    php artisan config:clear
+    php artisan cache:clear
 
-```
-
-```
 
 To install files for vendor run 
 
-bash ```
+    bash ```
+        composer install
+    ```
 
-composer install
-
-```
-
-```
