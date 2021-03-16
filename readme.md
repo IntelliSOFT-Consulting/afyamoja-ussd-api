@@ -55,7 +55,5 @@ After installing on production run
 
 To install files for vendor run 
 
-    bash ```
-        composer install
-    ```
-
+    composer install
+   
