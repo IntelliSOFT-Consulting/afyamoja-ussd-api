@@ -47,9 +47,9 @@ class UserController extends Controller
     public function registration(Request $request)
     {
         $rules = [
-        'first_name' =>  'required',
-        'last_name' =>  'required',
-        'id_number' => 'required',
+        'first_name' =>  'required|max:25',
+        'last_name' =>  'required|max:25',
+        'id_number' => 'required|numeric',
         'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/',
         'gender' => 'in:male,female',
         'dob' =>  'date_format:Y-m-d|before:-18 years',
@@ -80,13 +80,26 @@ class UserController extends Controller
     public function resetPin(Request $request)
     {
         $rules = [
-          'id_number' =>  'required',
+          'id_number' =>  'required|numeric',
           'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/'
         ];
 
-        $response = User::resetPin($request, $rules);
+        $data = [];
+        $status = "Failure";
 
-        return User::response($response->status, $response->message, $response->data);
+        $validator = Validator::make($request->json()->all(), $rules);
+        if ($validator->fails()) {
+            $status = "Failure";
+            $message = $validator->errors()->first();
+        } else {
+            $response = User::resetPin($request);
+
+            $status = $response->status;
+            $message = $response->message;
+            $data = $response->data;
+        }
+
+        return User::response($status, $message, $data);
     }
 
 
@@ -98,15 +111,28 @@ class UserController extends Controller
     public function changePin(Request $request)
     {
         $rules = [
-          'id_number' =>  'required',
-          'new_pin' =>  'required',
-          'current_pin' =>  'required',
+          'id_number' =>  'required|numeric',
+          'new_pin' =>  'required|digits_between:3,5',
+          'current_pin' =>  'required|digits_between:3,5',
           'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/'
         ];
 
-        $response = User::changePin($request, $rules);
+        $data = [];
+        $status = "Failure";
 
-        return User::response($response->status, $response->message, $response->data);
+        $validator = Validator::make($request->json()->all(), $rules);
+        if ($validator->fails()) {
+            $status = "Failure";
+            $message = $validator->errors()->first();
+        } else {
+            $response = User::changePin($request);
+
+            $status = $response->status;
+            $message = $response->message;
+            $data = $response->data;
+        }
+
+        return User::response($status, $message, $data);
     }
 
 
@@ -134,13 +160,14 @@ class UserController extends Controller
     public function addDependent(Request $request)
     {
         $rules = [
-          'first_name' =>  'required',
-          'last_name' =>  'required',
+          'first_name' =>  'required|max:25',
+          'last_name' =>  'required|max:25',
           'phonenumber' => 'required|regex:/^(\+254)[0-9]{9}$/',
           'gender' => 'required|in:male,female',
           'relationship' => 'required|in:spouse,child',
           'dob' =>  'required|date_format:Y-m-d',
           'msisdn' =>  'nullable|regex:/^(\+254)[0-9]{9}$/|required_if:relationship,=,spouse',
+          'id_number' =>  'nullable|numeric|required_if:relationship,=,spouse',
         ];
 
         $response = User::addDependent($request, $rules);
@@ -155,8 +182,8 @@ class UserController extends Controller
     public function deleteDependent(Request $request)
     {
         $rules = [
-          'first_name' =>  'required',
-          'last_name' =>  'required'
+          'first_name' =>  'required|max:25',
+          'last_name' =>  'required:max:25'
         ];
 
         $response = User::deleteDependent($request, $rules);

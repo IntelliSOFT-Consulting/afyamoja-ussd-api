@@ -126,12 +126,15 @@ class User extends Model
     /**
     *Get Reset User Pin
     **/
-    public static function resetPin($request, $rules)
+    public static function resetPin($request)
     {
         $status= "Failure";
         $message = "Sorry, unable to reset pin";
 
-        $user = User::where('phonenumber', $request['phonenumber'])->where('status', 1)->first();
+        $user = User::where('phonenumber', $request['phonenumber'])
+                      ->where('id_number', $request['id_number'])
+                      ->where('status', 1)
+                      ->first();
 
         if ($user) {
             $master = new MasterController();
@@ -157,7 +160,7 @@ class User extends Model
     /**
     *Change User Pin
     **/
-    public static function changePin($request, $rules)
+    public static function changePin($request)
     {
         $status= "Failure";
         $message = "Sorry, unable to change pin";

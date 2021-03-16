@@ -17,7 +17,7 @@ class PatientController extends Controller
         $rules = [
           'phonenumber' => 'regex:/^(\+254)[0-9]{9}$/',
           'provider' =>  'required',
-          'scope' =>  'required'
+          'scope' =>  'required|numeric|in:1,2'
         ];
         $response = User::shareProfile($request, $rules);
 
