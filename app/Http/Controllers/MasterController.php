@@ -664,7 +664,7 @@ class MasterController extends Controller
         ];
 
         if ($userKin->relationship != 'child') {
-            $next_of_kin = (object) array_merge((array)$next_of_kin, array(  'msisdn'=> [$userKin->msisdn],'id_number'=>$userKin->id_number ));
+            $next_of_kin = (object) array_merge((array)$next_of_kin, array('msisdn'=> [$userKin->msisdn]));
         }
 
         $curl_post_data = array('patient'=> $patient_data, 'next_of_kin' => [$next_of_kin]);
