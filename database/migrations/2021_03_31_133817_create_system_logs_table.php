@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFeedbackTable extends Migration
+class CreateSystemLogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateFeedbackTable extends Migration
      */
     public function up()
     {
-        Schema::create('feedback', function (Blueprint $table) {
+        Schema::create('system_logs', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('feedback_type_id');
-            $table->string('phonenumber', 20);
+            $table->string('url', 150);
+            $table->integer('http_code');
+            $table->mediumText('payload');
             $table->mediumText('response');
-            $table->boolean('sms_sent')->default(0);
+            $table->string('system', 10);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
@@ -31,6 +32,6 @@ class CreateFeedbackTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('feedback');
+        Schema::dropIfExists('system_logs');
     }
 }

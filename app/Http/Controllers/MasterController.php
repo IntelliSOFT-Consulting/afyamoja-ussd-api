@@ -571,7 +571,7 @@ class MasterController extends Controller
 
     public function menuItem($level, $choice)
     {
-        $content =  DB::table('menuItem')->where('level', '=', $level)->where('choice', '=', $choice)->first();
+        $content =  DB::table('menu_item')->where('level', '=', $level)->where('choice', '=', $choice)->first();
         if ($content) {
             return str_replace('_new', "\n", $content->text);
         } else {
