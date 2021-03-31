@@ -10,8 +10,9 @@ The system is connec
 The following endpoints / actions are available on the system.
 
 ### User Actions
-A user is able to register and access the system. 
-In the event that they forget they pin, it can be reset it and the new pin will be sent via sms. 
+
+A user is able to register and access the system.
+In the event that they forget they pin, it can be reset it and the new pin will be sent via sms.
 The user can fully delete their account if for one reason or another they want to exit the system.
 
     login
@@ -21,6 +22,7 @@ The user can fully delete their account if for one reason or another they want t
     forget_patient
 
 ### Dependent Actions
+
 To allow for easy mangement of dependents linked to the patient
 
     dependents
@@ -28,6 +30,7 @@ To allow for easy mangement of dependents linked to the patient
     delete_dependent
 
 ### Patient Actions
+
 The patient/user needs to be able to access and share their personal and medical records.
 
     share_records
@@ -38,12 +41,24 @@ The patient/user needs to be able to access and share their personal and medical
 More details can be accessed about the API endpoints from the Wiki Section.
 For the USSD the logic can be found on the Master Controller
 
-
 ## License
 
 The Laravel framework is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## Error
+## Installation
+
+Copy the .env.example file and rename to .env, add the following at the bottom
+
+    username={*api_username*}
+    password={*api_password*}
+    client_id={*client_id*}
+    client_secret={*client_secret*}
+    url_auth={*authentication_server*}
+    url={*url_api*}
+
+    senderID={*sender_id*}
+    usernameAT={*username_africastalking*}
+    apiKey={*apikey*}
 
 After installing on production run
 
@@ -52,8 +67,13 @@ After installing on production run
     php artisan config:clear
     php artisan cache:clear
 
+To install files for vendor run
 
-To install files for vendor run 
-
+    composer update
     composer install
-   
+
+Run Migrations to set up the tables and seed data
+
+    php artisan migrate:fresh --seed
+
+## Error
