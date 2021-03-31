@@ -9,7 +9,7 @@ use AfricasTalking\SDK\AfricasTalking;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
-class SMS extends Model
+class Sms extends Model
 {
     protected $table = 'sms';
 
@@ -49,7 +49,7 @@ class SMS extends Model
     */
     public static function saveSMS($receipient, $message, $status)
     {
-        $model = new SMS;
+        $model = new Sms;
         $model->receipient = $receipient;
         $model->content = $message;
         $model->status = $status;

@@ -14,11 +14,11 @@ class CreateUserTokensTable extends Migration
     public function up()
     {
         Schema::create('user_tokens', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->integer('user_id');
-            $table->string('user_agent');
-            $table->string('ip');
-            $table->string('firebase_id')->default('');
+            $table->string('user_agent', 250);
+            $table->string('ip', 100);
+            $table->string('firebase_id', 250)->default('');
             $table->mediumText('token');
             $table->dateTime('expire')->default(date('Y-m-d H:i:s', strtotime('+ 1 day')));
             $table->boolean('status')->default(1);

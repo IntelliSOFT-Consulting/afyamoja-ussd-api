@@ -15,7 +15,7 @@ class CreateQuestionsTable extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('msisdn', 25);
+            $table->string('msisdn', 25);
             $table->mediumText('question');
             $table->mediumText('answer');
             $table->timestamp('created_at')->useCurrent();

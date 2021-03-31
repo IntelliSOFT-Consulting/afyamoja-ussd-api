@@ -17,11 +17,11 @@ class CreateSessionsTable extends Migration
             $table->bigIncrements('id');
             $table->string('sessionId', 200);
             $table->string('access_token', 200);
-            $table->mediumText('text');
             $table->string('phonenumber', 20);
             $table->integer('level');
             $table->mediumText('text');
             $table->mediumText('choice', 250);
+            $table->integer('provider');
             $table->string('dependent', 100);
             $table->integer('dependent_age');
             $table->string('kin', 100);

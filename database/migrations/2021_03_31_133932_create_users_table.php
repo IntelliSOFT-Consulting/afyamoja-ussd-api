@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('last_name', 15);
             $table->string('dob', 10);
             $table->string('gender', 10);
-            $table->integer('id_number', 25);
+            $table->integer('id_number');
             $table->mediumText('pin');
             $table->boolean('terms_conditions')->default(0);
             $table->boolean('terms_conditions_sent')->default(0);
