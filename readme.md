@@ -5,7 +5,37 @@
 ## About AfyaMoja
 
 The AfyaMoja USSD and API code base is meant to allow for a client system to able to access patient details either through USSD or API.
-The system is connec
+
+## Installation
+
+Copy the .env.example file and rename to .env, add the following at the bottom
+
+    username={*api_username*}
+    password={*api_password*}
+    client_id={*client_id*}
+    client_secret={*client_secret*}
+    url_auth={*authentication_server*}
+    url={*url_api*}
+
+    senderID={*sender_id*}
+    usernameAT={*username_africastalking*}
+    apiKey={*apikey*}
+
+After installing on production run
+
+    php artisan key:generate
+    php artisan config:cache
+    php artisan config:clear
+    php artisan cache:clear
+
+To install files for vendor run
+
+    composer update
+    composer install
+
+Run Migrations to set up the tables and seed data
+
+    php artisan migrate:fresh --seed
 
 The following endpoints / actions are available on the system.
 
@@ -44,36 +74,5 @@ For the USSD the logic can be found on the Master Controller
 ## License
 
 The Laravel framework is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-## Installation
-
-Copy the .env.example file and rename to .env, add the following at the bottom
-
-    username={*api_username*}
-    password={*api_password*}
-    client_id={*client_id*}
-    client_secret={*client_secret*}
-    url_auth={*authentication_server*}
-    url={*url_api*}
-
-    senderID={*sender_id*}
-    usernameAT={*username_africastalking*}
-    apiKey={*apikey*}
-
-After installing on production run
-
-    php artisan key:generate
-    php artisan config:cache
-    php artisan config:clear
-    php artisan cache:clear
-
-To install files for vendor run
-
-    composer update
-    composer install
-
-Run Migrations to set up the tables and seed data
-
-    php artisan migrate:fresh --seed
 
 ## Error
