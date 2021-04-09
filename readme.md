@@ -39,6 +39,18 @@ Run Migrations to set up the tables and seed data
 
 The following endpoints / actions are available on the system.
 
+###BackUp Databases
+
+In this step, we need to create "backup" folder in your storage folder. you must have to create "backup" on following path:
+
+storage/app/backup
+
+make sure you give permission to put backup file.
+
+Add a cron job to run the backup
+
+    php artisan database:backup
+
 ### User Actions
 
 A user is able to register and access the system.
