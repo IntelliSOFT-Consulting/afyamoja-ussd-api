@@ -39,17 +39,23 @@ Run Migrations to set up the tables and seed data
 
 The following endpoints / actions are available on the system.
 
-###BackUp Databases
+###BackUp Database and Send Email
+
+Add configuration file
+
+    ~/afyamoja.cnf
 
 In this step, we need to create "backup" folder in your storage folder. you must have to create "backup" on following path:
 
-storage/app/backup
+    storage/app/backup
 
 make sure you give permission to put backup file.
 
 Add a cron job to run the backup
 
     php artisan database:backup
+
+Set emails on the MAIL_TO on .env file to let the backup know which emails to send to.
 
 ### User Actions
 
