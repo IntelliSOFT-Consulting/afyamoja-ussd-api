@@ -13,7 +13,7 @@ class SMSController extends Controller
     public function index()
     {
         //User::getBearerToken();
-        return Sms::sendSMS($_POST['receipients'], $_POST['message']);
+        return Sms::sendSMS('normal', $_POST['receipients'], $_POST['message']);
     }
 
     public function store()
