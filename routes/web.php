@@ -19,4 +19,8 @@ Route::get('/terms-and-conditions', function () {
     return view('terms');
 });
 
+Route::get('/terms', function () {
+    return view('terms_conditions');
+});
+
 Route::get('/user-guide', 'PDFController@show');
