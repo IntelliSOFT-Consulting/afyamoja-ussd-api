@@ -46,8 +46,9 @@ class DatabaseBackUp extends Command
 
         exec($command, $output, $returnVar);
 
-        $to = explode(',', env('MAIL_TO'));
-
-        Mail::to($to)->send(new MailDatabaseBackUp());
+        if (file_exists(storage_path()."/app/backup/".$filename)) {
+            $to = explode(',', env('MAIL_TO'));
+            Mail::to($to)->send(new MailDatabaseBackUp());
+        }
     }
 }
