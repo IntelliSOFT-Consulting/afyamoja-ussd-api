@@ -4,6 +4,6 @@
     <title>Database BackUp</title>
   </head>
   <body>
-    <p>Find attached the database backup for {{ env('DB_DATABASE').'_'.date('Y-m-d')}}</p>
+    <p>A new file has been uploaded into the Google drive for {{ env('DB_DATABASE').'_'.date('Y-m-d')}}</p>
   </body>
 </html>

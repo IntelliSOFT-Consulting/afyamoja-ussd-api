@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Mail\MailDatabaseBackUp;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class DatabaseBackUp extends Command
 {
@@ -49,6 +50,7 @@ class DatabaseBackUp extends Command
         if (file_exists(storage_path()."/app/backup/".$filename)) {
             $to = explode(',', env('MAIL_TO'));
             Mail::to($to)->send(new MailDatabaseBackUp());
+            Storage::disk('google')->put($filename, storage_path()."/app/backup/".$filename);
         }
     }
 }

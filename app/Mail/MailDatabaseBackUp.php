@@ -29,7 +29,7 @@ class MailDatabaseBackUp extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.backup')->attach(storage_path()."/app/backup/".env('DB_DATABASE')."-backup-".Carbon::now()->format('Y-m-d').".sql");
+        return $this->view('emails.backup');
         ;
     }
 }

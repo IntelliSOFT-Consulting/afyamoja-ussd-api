@@ -57,6 +57,8 @@ Add a cron job to run the backup
 
 Set emails on the MAIL_TO on .env file to let the backup know which emails to send to.
 
+Refer to https://gist.github.com/sergomet/f234cc7a8351352170eb547cccd65011 on how to set up Google Drive API integration.
+
 ### User Actions
 
 A user is able to register and access the system.
