@@ -18,7 +18,7 @@ Route::get('/sync_users', 'MasterController@sync');
 Route::get('/retrieve_patients', 'MasterController@syncPatients');
 Route::get('/send_feedback', 'FeedbackController@send');
 
-Route::post('/sendSms', 'SMSController@index');
+//Route::post('/sendSms', 'SMSController@index');
 Route::post('/receiveSms', 'SMSController@index');
 
 Route::post('/login', 'UserController@login');

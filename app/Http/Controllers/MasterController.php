@@ -12,8 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 
-require 'vendor/autoload.php';
-
 class MasterController extends Controller
 {
     public function index()
