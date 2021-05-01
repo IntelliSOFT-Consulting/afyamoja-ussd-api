@@ -50,8 +50,8 @@ class DatabaseBackUp extends Command
 
         if (file_exists(storage_path()."/app/backup/".$filename)) {
             $to = explode(',', env('MAIL_TO'));
-            Mail::to($to)->send(new MailDatabaseBackUp());
             Storage::disk('google')->put($filename, File::get(storage_path()."/app/backup/".$filename));
+            Mail::to($to)->send(new MailDatabaseBackUp());
         }
     }
 }
