@@ -2,7 +2,6 @@
 
 namespace App;
 
-require 'vendor/autoload.php';
 use App\SystemLog;
 use Illuminate\Http\Request;
 use AfricasTalking\SDK\AfricasTalking;
