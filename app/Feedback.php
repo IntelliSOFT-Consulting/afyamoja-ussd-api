@@ -3,6 +3,7 @@
 namespace App;
 
 use App\User;
+use App\Sms;
 use App\FeedbackType;
 use App\FeedbackClassification;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,7 @@ class Feedback extends Model
 
                 if ($session_idle->i > 10) {
                     $feedbackType = FeedbackType::where('id', $userFeedback->feedback_type_id)->first();
-                    $sendSMS = SMS::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
+                    $sendSMS = Sms::sendSMS('feedback', $userFeedback->phonenumber, $feedbackType->feedback);
                     if ($sendSMS['status'] == "success") {
                         Feedback::where('id', $userFeedback->id)->update(['sms_sent' => 1]);
                     }
@@ -91,7 +92,7 @@ class Feedback extends Model
             $AddFeedback->save();
 
             if ($AddFeedback) {
-                $sendSMS = SMS::sendSMS('feedback', $_POST['from'], $feedbackType->feedback);
+                $sendSMS = Sms::sendSMS('feedback', $_POST['from'], $feedbackType->feedback);
                 if ($sendSMS['status'] == "success") {
                     Feedback::where('id', $AddFeedback->id)->update(['sms_sent' => 1]);
                 }
