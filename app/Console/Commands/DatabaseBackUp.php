@@ -23,7 +23,7 @@ class DatabaseBackUp extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Backup database file.';
 
     /**
      * Create a new command instance.
@@ -50,7 +50,8 @@ class DatabaseBackUp extends Command
 
         if (file_exists(storage_path()."/app/backup/".$filename)) {
             $to = explode(',', env('MAIL_TO'));
-            Storage::disk('google')->put($filename, File::get(storage_path()."/app/backup/".$filename));
+            //File::get(storage_path()."/app/backup/".$filename)
+            Storage::disk('google')->put($filename, fopen(storage_path()."/app/backup/".$filename, 'r+'));
             Mail::to($to)->send(new MailDatabaseBackUp());
         }
     }
