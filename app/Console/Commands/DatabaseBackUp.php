@@ -50,10 +50,10 @@ class DatabaseBackUp extends Command
 
         if (file_exists(storage_path()."/app/backup/".$filename)) {
             $to = explode(',', env('MAIL_TO'));
-            $detector = new \League\MimeTypeDetection\FinfoMimeTypeDetector();
-            $mimeType = $detector->detectMimeTypeFromPath($filename);
-            //Storage::disk('google')->put($filename, fopen(storage_path()."/app/backup/".$filename, 'r+'), ['mimetype' => $mimeType]);
-            //Mail::to($to)->send(new MailDatabaseBackUp());
+
+            ini_set('memory_limit', '512M');
+            Storage::disk('google')->put($filename, fopen(storage_path()."/app/backup/".$filename, 'r+'), ['mimetype' => 'application/x-sql']);
+            Mail::to($to)->send(new MailDatabaseBackUp());
         }
     }
 }

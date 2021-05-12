@@ -1,12 +1,11 @@
 <?php
-/*
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
 class GoogleDriveServiceProvider extends ServiceProvider
 {
-
     public function boot()
     {
         \Storage::extend('google', function ($app, $config) {
@@ -27,4 +26,3 @@ class GoogleDriveServiceProvider extends ServiceProvider
         //
     }
 }
-*/
