@@ -68,4 +68,50 @@ class Token extends Model
             return $token->access_token;
         }
     }
+
+
+
+    public static function generalAPI($curl_post_data, $path)
+    {
+        $token = Token::token();
+
+        $url = env("url");
+        $url = $url.$path;
+
+        if ($token) {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept:application/json','Content-Type:application/json','Authorization:Bearer '.$token));
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            if ($curl_post_data) {
+                curl_setopt($curl, CURLOPT_POST, true);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_post_data);
+            }
+            curl_setopt($curl, CURLOPT_HEADER, 0);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
+            curl_setopt($curl, CURLOPT_TIMEOUT, 600);
+            $curl_response = curl_exec($curl);
+            $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($curl)) {
+                Log::info($path.curl_error($curl));
+            }
+
+            $request = new Request();
+            $request->replace([
+          'url' => $url,
+          'http_code' => $httpcode,
+          'payload' => $curl_post_data ,
+          'response' => $curl_response ,
+          'system' => 'SIL' ]);
+            SystemLog::store($request);
+
+            if ($httpcode != 500 && $httpcode != 401 && $httpcode != 404) {
+                return $curl_response;
+            }
+        }
+        return null;
+    }
 }

@@ -623,7 +623,7 @@ class MasterController extends Controller
              'id_number'=>$userData->id_number ,
         );
         $data_string = json_encode($curl_post_data);
-        $register = json_decode(self::generalAPI($data_string, 'patients/register_patient/'));
+        $register = json_decode(Token::generalAPI($data_string, 'patients/register_patient/'));
         if ($register && $register->status == "Success") {
             return $register;
         } elseif ($register && $register->status == "Failure" &&  $register->message ==  "Identifiers for this person exists.") {
@@ -667,7 +667,7 @@ class MasterController extends Controller
 
         $curl_post_data = array('patient'=> $patient_data, 'next_of_kin' => [$next_of_kin]);
         $data_string = json_encode($curl_post_data);
-        $add_kin = json_decode(self::generalAPI($data_string, 'patients/add_next_of_kin/'));
+        $add_kin = json_decode(Token::generalAPI($data_string, 'patients/add_next_of_kin/'));
         if ($add_kin && $add_kin->status == "Success") {
             return $add_kin;
         } else {
@@ -694,7 +694,7 @@ class MasterController extends Controller
 
         $curl_post_data = array('patient'=> $patient_data, 'next_of_kin' => [$next_of_kin]);
         $data_string = json_encode($curl_post_data);
-        $add_kin = json_decode(self::generalAPI($data_string, 'patients/remove_next_of_kin/'));
+        $add_kin = json_decode(Token::generalAPI($data_string, 'patients/remove_next_of_kin/'));
         if ($add_kin && $add_kin->status == "Success") {
             return $add_kin;
         } else {
@@ -714,7 +714,7 @@ class MasterController extends Controller
                 'scope'=> $scope
         );
         $data_string = json_encode($curl_post_data);
-        $share = json_decode(self::generalAPI($data_string, 'patients/start_visit/'));
+        $share = json_decode(Token::generalAPI($data_string, 'patients/start_visit/'));
         if ($share && $share->status == "Success") {
             return $share;
         } else {
@@ -732,7 +732,7 @@ class MasterController extends Controller
 
         $curl_post_data = array('patient'=> $objectPatient, 'current_pin' => $pin,'new_pin' =>$new_pin);
         $data_string = json_encode($curl_post_data);
-        $pinReset = json_decode(self::generalAPI($data_string, 'patients/reset_pin/'));
+        $pinReset = json_decode(Token::generalAPI($data_string, 'patients/reset_pin/'));
         if ($pinReset && $pinReset->status == "Success") {
             return $pinReset;
         } else {
@@ -750,7 +750,7 @@ class MasterController extends Controller
 
         $curl_post_data = array('patient'=> $objectPatient);
         $data_string = json_encode($curl_post_data);
-        $dependents = json_decode(self::generalAPI($data_string, 'patients/get_next_of_kin/'));
+        $dependents = json_decode(Token::generalAPI($data_string, 'patients/get_next_of_kin/'));
         if ($dependents && count($dependents) > 0) {
             return $dependents;
         } else {
@@ -768,7 +768,7 @@ class MasterController extends Controller
 
         $curl_post_data = array('patient'=> $objectPatient);
         $data_string = json_encode($curl_post_data);
-        $response = json_decode(self::generalAPI($data_string, 'patients/'.$url.'/'));
+        $response = json_decode(Token::generalAPI($data_string, 'patients/'.$url.'/'));
         if ($response && $response->status == "Success") {
             return $response;
         } else {
@@ -778,58 +778,12 @@ class MasterController extends Controller
 
     public function provider($token, $text)
     {
-        $provider = json_decode(self::generalAPI(null, "common/organisations/get_provider_code/$text/"));
+        $provider = json_decode(Token::generalAPI(null, "common/organisations/get_provider_code/$text/"));
         if ($provider && $provider->provider_name) {
             return $provider->provider_name;
         } else {
             return false;
         }
-    }
-
-
-
-    public function generalAPI($curl_post_data, $path)
-    {
-        $token = Token::token();
-
-        $url = env("url");
-        $url = $url.$path;
-
-        if ($token) {
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept:application/json','Content-Type:application/json','Authorization:Bearer '.$token));
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            if ($curl_post_data) {
-                curl_setopt($curl, CURLOPT_POST, true);
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_post_data);
-            }
-            curl_setopt($curl, CURLOPT_HEADER, 0);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 0);
-            curl_setopt($curl, CURLOPT_TIMEOUT, 600);
-            $curl_response = curl_exec($curl);
-            $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-            if (curl_errno($curl)) {
-                Log::info($path.curl_error($curl));
-            }
-
-            $request = new Request();
-            $request->replace([
-          'url' => $url,
-          'http_code' => $httpcode,
-          'payload' => $curl_post_data ,
-          'response' => $curl_response ,
-          'system' => 'SIL' ]);
-            SystemLog::store($request);
-
-            if ($httpcode != 500 && $httpcode != 401 && $httpcode != 404) {
-                return $curl_response;
-            }
-        }
-        return null;
     }
 
     public function validateDate($date, $format = 'Y-m-d')
@@ -840,12 +794,7 @@ class MasterController extends Controller
 
     public function sync()
     {
-        $users = User::where('terms_conditions', 1)
-            ->where('status', 1)
-            ->where('isSynced', 0)
-            ->limit(10)
-            ->get();
-
+        $users = User::where('terms_conditions', 1)->where('status', 1)->where('isSynced', 0)->limit(10)->get();
 
         foreach ($users as $user) {
             self::processRegistration($user);
@@ -874,16 +823,11 @@ class MasterController extends Controller
         }
     }
 
-    public function deletePatient()
-    {
-        $token = Token::token();
-    }
-
     public function syncPatients()
     {
         $token = Token::token();
 
-        $response = self::generalAPI(null, "patients/summary/?page_size=10");
+        $response = Token::generalAPI(null, "patients/summary/?page_size=10");
         $patients = json_decode($response);
 
         if ($patients) {
@@ -914,7 +858,7 @@ class MasterController extends Controller
                         $objectPatient = (object) ['msisdn'=> [$phonenumber],'id_number'=> $id_number,'passport_number'=> ''];
                         $curl_post_data = array('patient'=> $objectPatient, 'sync_status' => 1,'pin' =>$pin);
                         $data_string = json_encode($curl_post_data);
-                        $response = self::generalAPI($data_string, 'patients/sync_patient/');
+                        $response = Token::generalAPI($data_string, 'patients/sync_patient/');
 
                         $placeHolders = ['_name', '_pin'];
                         $content = [$patient->first_name.' '.$patient->last_name,$pin];
