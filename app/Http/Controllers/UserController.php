@@ -172,6 +172,25 @@ class UserController extends Controller
     }
 
     /**
+     * Update dependent
+     *
+     */
+    public function updateDependent(Request $request)
+    {
+        $rules = [
+          'first_name' =>  'required|max:25',
+          'last_name' =>  'required|max:25',
+          'first_name_update' =>  'required|max:25',
+          'last_name_update' =>  'required|max:25',
+          'gender_update' => 'required|in:male,female'
+        ];
+
+        $response = User::updateDependent($request, $rules);
+
+        return User::response($response->status, $response->message, $response->data);
+    }
+
+    /**
      * Delete dependent
      *
      */

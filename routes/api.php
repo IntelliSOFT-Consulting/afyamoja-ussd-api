@@ -27,8 +27,10 @@ Route::post('/reset_pin', 'UserController@resetPin');
 Route::post('/change_pin', 'UserController@changePin');
 Route::post('/dependents', 'UserController@dependents');
 Route::post('/add_dependent', 'UserController@addDependent');
+Route::post('/update_dependent', 'UserController@updateDependent');
 Route::post('/delete_dependent', 'UserController@deleteDependent');
 
+Route::post('/update_profile', 'PatientController@updateProfile');
 Route::post('/share_records', 'PatientController@shareProfile');
 Route::post('/last_visit', 'PatientController@lastVisit');
 Route::post('/full_history', 'PatientController@fullHistory');

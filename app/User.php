@@ -320,6 +320,41 @@ class User extends Model
     }
 
     /**
+    *Update Profile
+    **/
+    public static function updateProfile($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, we are unable to update your profile.";
+
+        $userUpdate = json_decode(json_encode($request->json()->all()));
+
+        $user = UserToken::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $updateProfile = $master->updateProfile($userUpdate, $user->response, Token::token());
+            if ($updateProfile) {
+                $status = "Success";
+                $message = "Your profile has been successfully updated";
+
+                User::where('phonenumber', $user->response->phonenumber)
+                      ->update([
+                        'first_name' => $userUpdate->first_name,
+                        'last_name' => $userUpdate->last_name ,
+                        'dob' =>  date('dmY', strtotime($userUpdate->dob))  ,
+                        'gender' => $userUpdate->gender
+                       ]);
+            } else {
+                $message = "We are currently not able to update your profile";
+            }
+        } else {
+            $message = $user->response;
+        }
+
+        return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
+    }
+
+    /**
     *Share Profile
     **/
     public static function shareProfile($request, $rules)
@@ -362,7 +397,8 @@ class User extends Model
             $master = new MasterController();
             $forget_patient = $master->request('forget_patient', $user->response, Token::token());
             $status = "Success";
-            User::where('phonenumber', $user->response->phonenumber)->update(['status' => 0, 'feedback_sent' => 0 ,'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
+            User::where('phonenumber', $user->response->phonenumber)
+                  ->update(['status' => 0, 'feedback_sent' => 0 ,'terms_conditions' => 0 , 'terms_conditions_sent' => 0,'isSynced' => 0]);
         } else {
             $message = $user->response;
         }
@@ -390,6 +426,33 @@ class User extends Model
                 $message = "Your dependent has been successfully added";
             } else {
                 $message = "We are currently not able to add dependent";
+            }
+        } else {
+            $message = $user->response;
+        }
+        return (object) ['status'=> $status,'message'=>$message,'data'=>[] ];
+    }
+
+
+    /**
+    *Update Dependents
+    **/
+    public static function updateDependent($request, $rules)
+    {
+        $status= "Failure";
+        $message = "Sorry, unable to update your dependent";
+
+        $kin = json_decode(json_encode($request->json()->all()));
+
+        $user = UserToken::getBearerToken($request, $rules);
+        if ($user->status == "Success") {
+            $master = new MasterController();
+            $addDependent = $master->updateKin($kin, $user->response, Token::token());
+            if ($addDependent) {
+                $status = "Success";
+                $message = "Your dependent has been successfully updated";
+            } else {
+                $message = "We are currently not able to update your dependent";
             }
         } else {
             $message = $user->response;

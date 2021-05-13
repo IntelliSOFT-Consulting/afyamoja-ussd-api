@@ -83,7 +83,10 @@ class Token extends Model
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept:application/json','Content-Type:application/json','Authorization:Bearer '.$token));
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            if ($curl_post_data) {
+            if (strpos($path, 'update') !== false) {
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PATCH');
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_post_data);
+            } elseif ($curl_post_data) {
                 curl_setopt($curl, CURLOPT_POST, true);
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_post_data);
             }

@@ -675,6 +675,40 @@ class MasterController extends Controller
         }
     }
 
+    public function updateKin($userKin, $userData, $token)
+    {
+        $patient_data = (object) [
+            'msisdn'=> [$userData->phonenumber],
+            'id_number'=> $userData->id_number ,
+            'passport_number'=> ''
+        ];
+
+        $next_of_kin = (object) [
+             'first_name'=> $userKin->first_name,
+             'last_name'=> $userKin->last_name
+        ];
+
+        $next_of_kin_update_data = (object) [
+             'first_name'=> $userKin->first_name_update,
+             'last_name'=> $userKin->last_name_update,
+             'gender'=> $userKin->gender_update,
+        ];
+
+        $curl_post_data = array(
+          'patient'=> $patient_data,
+          'next_of_kin' => $next_of_kin,
+          'next_of_kin_update_data' => $next_of_kin_update_data
+        );
+
+        $data_string = json_encode($curl_post_data);
+        $update_kin = json_decode(Token::generalAPI($data_string, 'patients/update_next_of_kin_bio/'));
+        if ($update_kin && $update_kin->status == "Success") {
+            return $update_kin;
+        } else {
+            return null;
+        }
+    }
+
     public function removeKin($userData, $token, $full_name)
     {
         $names = explode(" ", $full_name);
@@ -694,9 +728,34 @@ class MasterController extends Controller
 
         $curl_post_data = array('patient'=> $patient_data, 'next_of_kin' => [$next_of_kin]);
         $data_string = json_encode($curl_post_data);
-        $add_kin = json_decode(Token::generalAPI($data_string, 'patients/remove_next_of_kin/'));
-        if ($add_kin && $add_kin->status == "Success") {
-            return $add_kin;
+        $remove_kin = json_decode(Token::generalAPI($data_string, 'patients/remove_next_of_kin/'));
+        if ($remove_kin && $remove_kin->status == "Success") {
+            return $remove_kin;
+        } else {
+            return null;
+        }
+    }
+
+    public function updateProfile($userUpdate, $userData, $token)
+    {
+        $patient_data = (object) [
+            'msisdn'=> [$userData->phonenumber],
+            'id_number'=> $userData->id_number ,
+            'passport_number'=> ''
+        ];
+
+        $patient_update_data = (object) [
+             'first_name'=> $userUpdate->first_name,
+             'last_name'=> $userUpdate->last_name,
+             'date_of_birth'=> $userUpdate->dob,
+             'gender'=> $userUpdate->gender,
+        ];
+
+        $curl_post_data = array('patient'=> $patient_data, 'patient_update_data' => $patient_update_data);
+        $data_string = json_encode($curl_post_data);
+        $update_profile = json_decode(Token::generalAPI($data_string, 'patients/update_patient_bio/'));
+        if ($update_profile && $update_profile->status == "Success") {
+            return $update_profile;
         } else {
             return null;
         }

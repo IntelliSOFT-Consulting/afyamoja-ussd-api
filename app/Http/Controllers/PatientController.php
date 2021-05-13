@@ -26,6 +26,26 @@ class PatientController extends Controller
 
 
     /**
+     * Update Profile.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function updateProfile(Request $request)
+    {
+        $rules = [
+          'phonenumber' => 'regex:/^(\+254)[0-9]{9}$/',
+          'first_name' => 'required|max:25',
+          'last_name' => 'required|max:25',
+          'dob' => 'required|date_format:Y-m-d',
+          'gender' => 'required|in:male,female'
+        ];
+        $response = User::updateProfile($request, $rules);
+
+        return User::response($response->status, $response->message, $response->data);
+    }
+
+
+    /**
      * Start Visit.
      *
      * @return \Illuminate\Http\Response
