@@ -63,7 +63,7 @@ class Feedback extends Model
                         break;
                     }
                     if ($message) {
-                        SMS::sendSMS('feedback', $_POST['from'], $message);
+                        Sms::sendSMS('feedback', $_POST['from'], $message);
                     }
                 }
 

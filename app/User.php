@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\SMS;
+use App\Sms;
 use App\Token;
 use App\UserToken;
 use Illuminate\Support\Facades\Hash;
@@ -144,9 +144,9 @@ class User extends Model
                 $pin = $forgotPin->data->pin;
                 $user = User::where('id', $user->id)->update(['pin' => Hash::make($forgotPin->data->pin)]);
                 if ($user) {
-                    SMS::sendSMS('normal', $phonenumber, $first_name.", we have reset your PIN to ".$pin);
+                    Sms::sendSMS('normal', $phonenumber, $first_name.", we have reset your PIN to ".$pin);
                     $status = "Success";
-                    $message = "Your pin has been reset, you should receive an SMS shortly";
+                    $message = "Your pin has been reset, you should receive an Sms shortly";
                 }
             }
         }
