@@ -30,7 +30,6 @@ After installing on production run
 
 To install files for vendor run
 
-    composer update
     composer install
 
 Run Migrations to set up the tables and seed data
