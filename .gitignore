@@ -76,7 +76,7 @@ Homestead.json
 /vendor
 .env
 /public/.htaccess
-/storage
+
 storage/*.key
 
 /app/Http/Controllers/AccountController.php
