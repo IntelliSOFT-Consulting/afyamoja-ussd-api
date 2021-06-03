@@ -76,6 +76,7 @@ Homestead.json
 /vendor
 .env
 /public/.htaccess
+/node_modules
 
 storage/*.key
 
