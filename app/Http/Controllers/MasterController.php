@@ -692,6 +692,8 @@ class MasterController extends Controller
              'first_name'=> $userKin->first_name_update,
              'last_name'=> $userKin->last_name_update,
              'gender'=> $userKin->gender_update,
+             'relationship'=> $userKin->relationship_update,
+             'date_of_birth'=> $userKin->dob_update,
         ];
 
         $curl_post_data = array(

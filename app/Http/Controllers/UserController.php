@@ -182,7 +182,9 @@ class UserController extends Controller
           'last_name' =>  'required|max:25',
           'first_name_update' =>  'required|max:25',
           'last_name_update' =>  'required|max:25',
-          'gender_update' => 'required|in:male,female'
+          'gender_update' => 'required|in:male,female',
+          'dob_update' => 'required|date_format:Y-m-d',
+          'relationship_update' => 'required|in:spouse,child'
         ];
 
         $response = User::updateDependent($request, $rules);
