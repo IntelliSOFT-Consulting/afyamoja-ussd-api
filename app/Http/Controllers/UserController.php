@@ -162,7 +162,7 @@ class UserController extends Controller
           'last_name' =>  'required|max:25',
           'gender' => 'required|in:male,female',
           'relationship' => 'required|in:spouse,child',
-          'dob' =>  'required|date_format:Y-m-d',
+          'date_of_birth' =>  'required|date_format:Y-m-d',
           'msisdn' =>  'nullable|regex:/^(\+254)[0-9]{9}$/|required_if:relationship,=,spouse',
         ];
 
@@ -183,7 +183,7 @@ class UserController extends Controller
           'first_name_update' =>  'required|max:25',
           'last_name_update' =>  'required|max:25',
           'gender_update' => 'required|in:male,female',
-          'dob_update' => 'required|date_format:Y-m-d',
+          'date_of_birth_update' => 'required|date_format:Y-m-d',
           'relationship_update' => 'required|in:spouse,child'
         ];
 

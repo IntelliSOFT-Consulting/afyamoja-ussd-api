@@ -655,7 +655,7 @@ class MasterController extends Controller
         $next_of_kin = (object) [
              'first_name'=> $userKin->first_name,
              'last_name'=> $userKin->last_name,
-             'date_of_birth'=> $userKin->dob,
+             'date_of_birth'=> $userKin->date_of_birth,
              'gender'=> $userKin->gender,
              'relationship'=>$userKin->relationship,
 
@@ -693,7 +693,7 @@ class MasterController extends Controller
              'last_name'=> $userKin->last_name_update,
              'gender'=> $userKin->gender_update,
              'relationship'=> $userKin->relationship_update,
-             'date_of_birth'=> $userKin->dob_update,
+             'date_of_birth'=> $userKin->date_of_birth_update,
         ];
 
         $curl_post_data = array(
